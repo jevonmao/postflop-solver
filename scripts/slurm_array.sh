@@ -53,12 +53,18 @@ command -v cargo >/dev/null || { echo "ERROR: cargo not on PATH (CARGO_HOME=$CAR
 
 # ---------- slice math ----------
 # Each task takes WINDOW consecutive positions in stratified order.
-# Last task may take fewer; FLOP_LIMIT extending past 1755 is clamped by the driver.
-TOTAL_FLOPS=1755
+# Last task may take fewer; FLOP_LIMIT extending past tier total is clamped by the driver.
 ARRAY_SIZE="${SLURM_ARRAY_TASK_COUNT:-1}"
-WINDOW=$(( (TOTAL_FLOPS + ARRAY_SIZE - 1) / ARRAY_SIZE ))
 
-export TIER=full
+# TIER may be set via --export=ALL,TIER=smoke|medium|full. Default: full.
+export TIER="${TIER:-full}"
+# Cap the array's slice math to whatever the chosen tier covers.
+case "$TIER" in
+    smoke)  TIER_TOTAL=100  ;;
+    medium) TIER_TOTAL=500  ;;
+    full|*) TIER_TOTAL=1755 ;;
+esac
+WINDOW=$(( (TIER_TOTAL + ARRAY_SIZE - 1) / ARRAY_SIZE ))
 export FLOP_START=$(( SLURM_ARRAY_TASK_ID * WINDOW ))
 export FLOP_LIMIT=$WINDOW
 
