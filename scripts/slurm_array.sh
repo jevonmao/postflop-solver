@@ -21,14 +21,14 @@
 
 # ---------- SLURM resource request ----------
 #SBATCH --job-name=postflop-dataset
-#SBATCH --account=FIXME_GROUP_ACCOUNT
-#SBATCH --partition=FIXME_PARTITION
+#SBATCH --account=default
+#SBATCH --partition=svl
 #SBATCH --array=0-19                  # 20 slices × ~88 flops/slice (tune to fit walltime)
 #SBATCH --nodes=1                     # one node per array task
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=72            # all logical CPUs on a 2-socket Xeon Gold 5220
+#SBATCH --cpus-per-task=72            # all logical CPUs on a 2-socket Xeon Gold 5220 (svl8)
 #SBATCH --mem=128G                    # SRP peak ~17 GB × 2 NUMA shards + headroom
-#SBATCH --time=12:00:00               # FIXME: see "Sizing" section in CLAUDE.md
+#SBATCH --time=12:00:00               # see "Sizing" section in CLAUDE.md
 #SBATCH --output=logs/slurm_%A_%a.out # %A = array job id, %a = task id
 #SBATCH --error=logs/slurm_%A_%a.err
 #SBATCH --requeue                     # auto-resubmit on preemption (resume-safe)
