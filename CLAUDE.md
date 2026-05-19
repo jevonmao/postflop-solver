@@ -30,12 +30,21 @@ All runnable as `cargo run --release --example <name>`. Some take env vars.
 | `dataset_driver` | The production driver. Iterates `(matchup × canonical_flop)` in stratified order, writes one JSONL of decision-node records per spot. Resumable. See pipeline section below. |
 | `verify_dataset` | Audits the dataset under `data/solves/` after a driver run — per-matchup stats, tier coverage, sample-record sanity check. |
 
-## Performance model (Ryzen 5950X, WSL2)
+## Performance model
 
-- Solver is **memory-bandwidth bound**. Compiler flags move wall-clock by ~3%. Hot path is already hand-tuned to SIMD (9k+ AVX ops, 0 plain SSE in the release binary).
-- **Single-machine concurrency does not help.** Rayon saturates all cores inside one `solve()`. Running two solves in parallel just splits cores and contends on DRAM.
-- **Multi-machine sharding is the right scaling axis.** The `(matchup, flop)` workload is embarrassingly parallel — use filesystem-presence as the work queue. ~10× cloud burst (e.g. spot c7a.16xlarge) cuts the full HU 200 BB dataset to ~3 hours for ~$50–100.
-- `allocate_memory(true)` (compression) **slows** solves; it halves RAM at the cost of encode/decode per access. Only enable when a single spot won't fit in RAM. On HU 200 BB, only a few rainbow SRP flops cross ~18 GB — gate compression with `if game.memory_usage().0 > 18 * (1 << 30) { allocate_memory(true) } else { allocate_memory(false) }`.
+Two reference machines:
+
+| Machine | CPU | Cores / Threads | RAM | NUMA | ISA |
+|---|---|---|---|---|---|
+| Ryzen dev box (WSL2) | Ryzen 5950X @ ~4.5 GHz | 16 / 32 | 64 GB | 1 node | AVX2 |
+| svl8 production server | 2× Xeon Gold 5220 @ 2.2 GHz | 36 / 72 | 503 GB | **2 nodes** | AVX-512 |
+
+- Solver is **memory-bandwidth bound** *per solve*. Compiler flags move wall-clock by ~3%. Hot path is already hand-tuned to SIMD (9k+ AVX ops, 0 plain SSE in the release binary).
+- **Single-NUMA-node concurrency does not help.** Rayon saturates all cores inside one `solve()`. Running two solves on the same socket just splits cores and contends on DRAM. (This is the only true statement on the Ryzen box.)
+- **Cross-NUMA-node concurrency *does* help.** Each socket on svl8 has its own DRAM channels and L3 cache, so a `numactl --cpunodebind=N --membind=N` solve on node 0 doesn't fight a solve on node 1. **Two NUMA nodes ≈ two machines in one chassis** for this workload. Use `scripts/run_production.sh` — it auto-detects topology and launches one shard per node by default.
+- **Per-matchup oversubscription.** 1 shard / NUMA is right for **SRP only** (8–17 GB working set, bandwidth-bound). For **4BP** (~130 MB, fits in 49.5 MiB L3 per socket → core-bound) you can run ~8 shards/node for big wall-clock wins. For **3BP** (~1.5 GB) ~4 shards/node is a good middle ground. See "[Cluster runs on svl8](#cluster-runs-on-svl8)" below.
+- **Multi-machine sharding** is also wired (`SHARD_INDEX` / `SHARD_COUNT` + shared filesystem). ~10× cloud burst (e.g. spot c7a.16xlarge) cuts the full HU 200 BB dataset to ~3 hours for ~$50–100.
+- `allocate_memory(true)` (compression) **slows** solves; it halves RAM at the cost of encode/decode per access. Only enable when a single spot won't fit in RAM. Driver gates this at 18 GB by default — appropriate for the 64 GB Ryzen box. On the 503 GB svl8 server, raise the threshold (e.g. `COMPRESS_THRESHOLD_GB=999`) so compression is never triggered. Current code path: `dataset_driver.rs:279` (constant `18.0` — to be made env-configurable).
 
 ## Throughput baseline (HU 200 BB, rich-flop config below)
 
@@ -269,9 +278,34 @@ Useful for verifying changes don't regress.
 
 If `range_advantage` ever flips sign on a board that obviously favors one player, suspect either a stale `cache_normalized_weights()` call or a player-index mix-up (OOP=0, IP=1).
 
-## Repository state notes
+## Cluster runs on svl8
 
-- `src/action_tree.rs` fix is local but **uncommitted** as of session end — `git config user.name` / `user.email` are unset, so `git commit` fails with "empty ident name." Set both repo-locally and the commit will succeed without any other intervention.
-- `.cargo/config.toml` is a new file (native CPU flags) — also part of the uncommitted change.
-- `Cargo.toml` has `[profile.release]` additions (LTO + codegen-units) — same.
-- Examples added this session: `btn_vs_bb_100bb`, `throughput_bench`, `hu_200bb_bench`, `srp_speedup_bench`, `range_advantage_demo`, `tree_walker_demo`. All clean-build and run.
+svl8 = 2-socket Xeon Gold 5220, 72 threads, 503 GB RAM, AVX-512, 2 NUMA nodes (node0: CPUs 0–17, 36–53; node1: 18–35, 54–71). L3 = 24.75 MiB / socket.
+
+Launcher: `scripts/run_production.sh <tier> [matchups]`. It:
+1. Builds `dataset_driver` in release mode (target-cpu=native picks up AVX-512 on this host).
+2. Sanity-checks the binary for AVX-512 instructions via `objdump`.
+3. Verifies `data/hu_200bb_ranges.txt` + `data/canonical_flops_stratified.txt` exist (generates the latter if missing).
+4. Auto-detects NUMA topology and launches **one driver per NUMA node**, each pinned with `numactl --cpunodebind=N --membind=N` and `RAYON_NUM_THREADS=<cpus on that node>`. Shards stripe over stratified order via `SHARD_INDEX` / `SHARD_COUNT`.
+5. Logs per shard to `logs/shard_<N>.log`. Waits for all to finish, then runs `verify_dataset`.
+
+Recovery semantics: kill -9 on a shard is safe — atomic `.tmp → rename` writes mean half-written `.jsonl` files cannot exist. Restart with the same tier; file-presence check skips done spots.
+
+**Known tuning gaps** (un-done as of this writing — to address before kicking off the full run):
+- One-shard-per-NUMA-node is correct for **SRP only**. 4BP/3BP are core-bound (not DRAM-bound) and can take 4–8 shards per NUMA node for ~2–4× wall-clock speedup. `run_production.sh` currently does not vary shards-per-node by matchup.
+- `COMPRESS_THRESHOLD_GB` is a hardcoded 18.0 (`dataset_driver.rs:279`). On svl8's 503 GB RAM it should be raised to never trigger.
+
+## Repository state
+
+- **Branch:** `main`. All infrastructure committed.
+- **Key commits (this work):**
+  - `9d567d1` — `feat(dataset): HU 200BB stratified-tier generation infrastructure` (canonical-flop enum, stratified order, dataset driver, tree walker, ranges template, run/status scripts, CLAUDE.md notes). Adds 1755 canonical flops + tier constants (SMOKE=100, MEDIUM=500, FULL=1755).
+  - `6f4e6e3` — earlier docs+examples for the same effort.
+  - `d6666f9` — `.cargo/config.toml` native-CPU + fat-LTO release profile.
+  - `2e9816c` — Rust 1.95 implicit-autoref fix in `action_tree.rs`.
+- **Generated artifacts** (gitignored): `/data/solves/` (per-spot JSONL+meta), `/target.bak/`.
+- **Dataset progress** under `data/solves/`:
+  - 4BP: 100/100 smoke complete
+  - 3BP: 2/100 smoke
+  - SRP: 2/100 smoke
+- **Examples added across the dataset work:** `btn_vs_bb_100bb`, `throughput_bench`, `hu_200bb_bench`, `srp_speedup_bench`, `range_advantage_demo`, `tree_walker_demo`, `canonical_flops`, `verify_hu_ranges`, `solve_srp_real_ranges`, `dataset_driver`, `verify_dataset`. All clean-build and run.
