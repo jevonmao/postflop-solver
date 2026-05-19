@@ -19,3 +19,7 @@ zstd = { version = "0.12.4", optional = true, default-features = false }
 default = ["bincode", "rayon"]
 custom-alloc = []
 rayon = ["dep:rayon", "zstd?/zstdmt"]
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
