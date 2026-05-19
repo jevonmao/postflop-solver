@@ -5,14 +5,15 @@
 // Lean:                50%   flop  + 75% turn + 75%   river   (1 size per street)
 // Lean + target 2%:    same lean tree, 2% exploitability cap
 
+use postflop_solver::hu_200bb_ranges::{Action as RangeAction, PreflopRanges};
 use postflop_solver::*;
 use std::time::Instant;
 
 fn main() {
-    let btn_open = "22+,A2s+,K2s+,Q2s+,J4s+,T6s+,96s+,85s+,75s+,64s+,53s+,\
-                    A2o+,K5o+,Q8o+,J8o+,T8o+,97o+,87o,76o";
-    let bb_call = "JJ-22,AQs-A2s,KJs-K2s,QJs-Q5s,J9s-J6s,T9s-T7s,96s+,85s+,75s+,64s+,\
-                   AJo-A2o,KJo-K8o,QJo-Q9o,JTo-J9o,T9o-T8o,98o,87o,76o,65o";
+    // Real HU 200 BB SRP ranges from the template file.
+    let r = PreflopRanges::load_default().expect("load preflop ranges");
+    let ip_range  = r.get("SB_FIRST_ACTION", RangeAction::Raise).expect("SB raise").clone();
+    let oop_range = r.get("BB_VS_SB_RAISE",  RangeAction::Call ).expect("BB call").clone();
 
     let rich_flop  = BetSizeOptions::try_from(("33%,75%", "3x")).unwrap();
     let rich_turn  = BetSizeOptions::try_from(("75%",     "3x")).unwrap();
@@ -27,25 +28,18 @@ fn main() {
 
     println!("{:<24} {:>10} {:>10} {:>10} {:>14}", "config", "mem (GB)", "solve (s)", "iters", "expl% pot");
 
-    // -- Rich tree, 1% target (current benchmark setting)
-    run("rich + target 1%",  flop, bb_call, btn_open, &rich_flop, &rich_turn, &rich_river, 0.01, 300);
-
-    // -- Rich tree, 2% target — loosen exploitability only
-    run("rich + target 2%",  flop, bb_call, btn_open, &rich_flop, &rich_turn, &rich_river, 0.02, 300);
-
-    // -- Lean tree, 1% target — shrink bet tree only
-    run("lean + target 1%",  flop, bb_call, btn_open, &lean_flop, &lean_turn, &lean_river, 0.01, 300);
-
-    // -- Lean tree, 2% target — combine both levers
-    run("lean + target 2%",  flop, bb_call, btn_open, &lean_flop, &lean_turn, &lean_river, 0.02, 300);
+    run("rich + target 1%",  flop, &oop_range, &ip_range, &rich_flop, &rich_turn, &rich_river, 0.01, 300);
+    run("rich + target 2%",  flop, &oop_range, &ip_range, &rich_flop, &rich_turn, &rich_river, 0.02, 300);
+    run("lean + target 1%",  flop, &oop_range, &ip_range, &lean_flop, &lean_turn, &lean_river, 0.01, 300);
+    run("lean + target 2%",  flop, &oop_range, &ip_range, &lean_flop, &lean_turn, &lean_river, 0.02, 300);
 }
 
 #[allow(clippy::too_many_arguments)]
-fn run(label: &str, flop: &str, oop: &str, ip: &str,
+fn run(label: &str, flop: &str, oop: &Range, ip: &Range,
        fb: &BetSizeOptions, tb: &BetSizeOptions, rb: &BetSizeOptions,
        target_pct: f32, max_iter: u32) {
     let card_config = CardConfig {
-        range: [oop.parse().unwrap(), ip.parse().unwrap()],
+        range: [oop.clone(), ip.clone()],
         flop:  flop_from_str(flop).unwrap(),
         turn:  NOT_DEALT,
         river: NOT_DEALT,

@@ -24,6 +24,11 @@ All runnable as `cargo run --release --example <name>`. Some take env vars.
 | `srp_speedup_bench` | A/B/C/D matrix comparing bet-tree complexity × exploitability target on the heaviest SRP spot. Source of the "rich-flop / lean-elsewhere / 2% target" recommendation. |
 | `range_advantage_demo` | At-root range/nut/equity-bucket extraction. Shows that derived features track solver behavior on contrasting boards (Kh7d2c IP-favored vs Th9d8h roughly even). |
 | `tree_walker_demo` | Full DFS over a solved game tree emitting one JSON record per decision node with strategy label + range-advantage features. Test it on small spots first via `SPOT=4bp` (~1.3s) before `SPOT=3bp` (~17s). |
+| `canonical_flops` | Generates `data/canonical_flops.txt` (sorted, 1755 entries) and `data/canonical_flops_stratified.txt` (stratified order — tier-ready). |
+| `verify_hu_ranges` | Loads `data/hu_200bb_ranges.txt` and prints a table of every non-empty range with combo count + total weight. Run after editing the template. |
+| `solve_srp_real_ranges` | End-to-end smoke: loads ranges, solves one SRP flop, prints root-node range/nut advantages + BB strategy. `FLOP=<board>` env var. |
+| `dataset_driver` | The production driver. Iterates `(matchup × canonical_flop)` in stratified order, writes one JSONL of decision-node records per spot. Resumable. See pipeline section below. |
+| `verify_dataset` | Audits the dataset under `data/solves/` after a driver run — per-matchup stats, tier coverage, sample-record sanity check. |
 
 ## Performance model (Ryzen 5950X, WSL2)
 
@@ -181,11 +186,77 @@ Iterate all 22,100 flops, canonicalize, dedupe into a `HashSet`, persist the 1,7
 
 ## Dataset pipeline (resumable driver)
 
-1. Enumerate the 1,755 canonical flops once → persist.
-2. Iterate `(matchup, flop)` in deterministic order. Matchups: SRP, 3BP, 4BP — three total.
-3. Per spot: solve → walk tree → emit one JSONL record per decision node. Optionally persist the bincode+zstd game file.
-4. Resumability via output-file presence on the per-spot path. Atomic writes: write `.tmp`, fsync, rename. Killing and restarting `cargo run --release --bin driver` picks up where it left off.
-5. Shardable: a second machine with the same output directory (NFS / shared FS) reads the same presence checks — no coordination needed beyond `mkdir`/`rename` atomicity.
+End-to-end pipeline is wired up:
+
+```
+data/hu_200bb_ranges.txt   ─┐
+data/canonical_flops*.txt  ─┤   src/canonical.rs (1755 flops + stratified order)
+                            ├── examples/dataset_driver.rs
+src/dataset_walker.rs       ─┘        │
+                                       ▼
+                            data/solves/<matchup>/<idx>_<flop>.jsonl
+                                       │
+                                       ▼
+                            examples/verify_dataset.rs  (audit per-tier)
+```
+
+### Tiered runs (smoke → medium → full)
+
+Use the `TIER` env var. Flops are processed in **stratified order** so any
+prefix is maximally representative of the full 1,755:
+
+```sh
+# Smoke (100 flops × 3 matchups): ~5 hours total. Validates pipeline at scale.
+TIER=smoke   cargo run --release --example dataset_driver
+
+# Medium (500 flops): ~24 hours. Adds 400 new flops (smoke spots auto-skipped).
+TIER=medium  cargo run --release --example dataset_driver
+
+# Full (1,755 flops): ~85 hours total. Adds the remaining 1,255 flops.
+TIER=full    cargo run --release --example dataset_driver
+
+# Audit any tier after it completes
+cargo run --release --example verify_dataset
+```
+
+Per-tier rough budget on this machine: 4BP ~ 3 s/spot, 3BP ~ 23 s, SRP ~ 145 s
+(see [throughput baseline](#throughput-baseline-hu-200-bb-rich-flop-config-below)).
+The first 100 stratified flops are guaranteed to cover every
+(rank-shape × suit-pattern × high-card-bucket) bucket — verified by unit test.
+
+### File layout & invariants
+
+- Filenames use the **stable canonical sort index** (e.g. `1755_AcAdAh.jsonl`),
+  not the stratified-order position. Re-running with a different `TIER` never
+  causes file-name churn or recomputation — already-solved spots are skipped
+  via file-presence check.
+- Each solved spot writes `<idx>_<flop>.jsonl` + `<idx>_<flop>.meta`. The
+  driver skips a spot only when **both** files exist.
+- Atomic writes: `.tmp` file → fsync → rename. Killing the driver mid-spot
+  cannot leave a half-written `.jsonl` visible.
+- Shardable across machines: each worker runs with `FLOP_START=<offset>`
+  `FLOP_LIMIT=<size>` covering its slice. File-presence is the only
+  coordination needed (use a shared filesystem).
+
+### Other useful driver env vars
+
+```
+MATCHUPS=SRP,3BP,4BP   subset (default: all three)
+FLOP_LIMIT=N           override TIER size
+FLOP_START=N           skip first N positions in stratified order
+MAX_ITER=N             solver iteration cap (default: 200)
+TARGET_PCT=0.02        exploitability target (default: 2% of pot)
+TURN_SAMPLES=8         chance-sampling density for turn
+RIVER_SAMPLES=6        chance-sampling density for river
+OUT_DIR=path           override data/solves
+```
+
+### Generate input files (one-time setup after clone)
+
+```sh
+cargo run --release --example canonical_flops   # writes both order files to data/
+cargo run --release --example verify_hu_ranges  # confirms the ranges template parses
+```
 
 ## Sanity-check outputs (what working looks like)
 

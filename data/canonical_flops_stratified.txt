@@ -1,0 +1,1760 @@
+# 1755 canonical flops in STRATIFIED order.
+# Any prefix is maximally representative — first 100 = smoke tier,
+# first 500 = medium tier, full 1755 = full tier.
+# Format: <canonical_sort_idx> <c1> <c2> <c3>. Filenames in data/solves/
+# use the canonical_sort_idx so they are stable across tiers.
+1755 Ac Ad Ah
+1750 Kc Kd Kh
+1708 Jc Jd Jh
+1590 9c 9d 9h
+1356 7c 7d 7h
+   1 2c 2d 2h
+  24 2c 2d Ac
+  22 2c 2d Kc
+  18 2c 2d Jc
+  14 2c 2d 9c
+  10 2c 2d 7c
+   2 2c 2d 3c
+  25 2c 2d Ah
+  23 2c 2d Kh
+  19 2c 2d Jh
+  15 2c 2d 9h
+  11 2c 2d 7h
+   3 2c 2d 3h
+  47 2c 3c Ac
+  45 2c 3c Kc
+  41 2c 3c Jc
+  37 2c 3c 9c
+  33 2c 3c 7c
+  27 2c 3c 4c
+  48 2c 3c Ad
+  46 2c 3c Kd
+  42 2c 3c Jd
+  38 2c 3c 9d
+  34 2c 3c 7d
+  28 2c 3c 4d
+  82 2c 3d Ah
+  79 2c 3d Kh
+  73 2c 3d Jh
+  67 2c 3d 9h
+  61 2c 3d 7h
+  52 2c 3d 4h
+1736 Qc Qd Qh
+1661 Tc Td Th
+1490 8c 8d 8h
+ 380 3c 3d 3h
+ 378 2c Ac Ad
+ 371 2c Kc Kd
+  20 2c 2d Qc
+  16 2c 2d Tc
+  12 2c 2d 8c
+   4 2c 2d 4c
+ 379 2c Ad Ah
+ 374 2c Kd Kh
+  21 2c 2d Qh
+  17 2c 2d Th
+  13 2c 2d 8h
+   5 2c 2d 4h
+ 102 2c 4c Ac
+ 100 2c 4c Kc
+  43 2c 3c Qc
+  39 2c 3c Tc
+  35 2c 3c 8c
+  29 2c 3c 5c
+  80 2c 3d Ac
+  77 2c 3d Kc
+  44 2c 3c Qd
+  40 2c 3c Td
+  36 2c 3c 8d
+  30 2c 3c 5d
+ 134 2c 4d Ah
+ 131 2c 4d Kh
+  76 2c 3d Qh
+  70 2c 3d Th
+  64 2c 3d 8h
+  55 2c 3d 5h
+ 700 4c 4d 4h
+ 401 3c 3d Ac
+ 399 3c 3d Kc
+ 342 2c Jc Jd
+ 293 2c 9c 9d
+ 224 2c 7c 7d
+   6 2c 2d 5c
+ 402 3c 3d Ah
+ 400 3c 3d Kh
+ 349 2c Jd Jh
+ 304 2c 9d 9h
+ 239 2c 7d 7h
+   7 2c 2d 5h
+ 152 2c 5c Ac
+ 150 2c 5c Kc
+  96 2c 4c Jc
+  92 2c 4c 9c
+  88 2c 4c 7c
+  31 2c 3c 6c
+  81 2c 3d Ad
+  78 2c 3d Kd
+  71 2c 3d Jc
+  65 2c 3d 9c
+  59 2c 3d 7c
+  32 2c 3c 6d
+ 181 2c 5d Ah
+ 178 2c 5d Kh
+ 125 2c 4d Jh
+ 119 2c 4d 9h
+ 113 2c 4d 7h
+  58 2c 3d 6h
+ 966 5c 5d 5h
+ 698 3c Ac Ad
+ 691 3c Kc Kd
+ 359 2c Qc Qd
+ 320 2c Tc Td
+ 261 2c 8c 8d
+   8 2c 2d 6c
+ 699 3c Ad Ah
+ 694 3c Kd Kh
+ 364 2c Qd Qh
+ 329 2c Td Th
+ 274 2c 8d 8h
+   9 2c 2d 6h
+ 197 2c 6c Ac
+ 195 2c 6c Kc
+  98 2c 4c Qc
+  94 2c 4c Tc
+  90 2c 4c 8c
+  84 2c 4c 5c
+ 103 2c 4c Ad
+ 101 2c 4c Kd
+  72 2c 3d Jd
+  66 2c 3d 9d
+  60 2c 3d 7d
+  50 2c 3d 4c
+ 223 2c 6d Ah
+ 220 2c 6d Kh
+ 128 2c 4d Qh
+ 122 2c 4d Th
+ 116 2c 4d 8h
+ 107 2c 4d 5h
+1183 6c 6d 6h
+ 719 4c 4d Ac
+ 717 4c 4d Kc
+ 395 3c 3d Jc
+ 391 3c 3d 9c
+ 387 3c 3d 7c
+  26 2c 3c 3d
+ 720 4c 4d Ah
+ 718 4c 4d Kh
+ 396 3c 3d Jh
+ 392 3c 3d 9h
+ 388 3c 3d 7h
+  49 2c 3d 3h
+ 237 2c 7c Ac
+ 235 2c 7c Kc
+ 146 2c 5c Jc
+ 142 2c 5c 9c
+ 138 2c 5c 7c
+  86 2c 4c 6c
+ 132 2c 4d Ac
+ 129 2c 4d Kc
+  74 2c 3d Qc
+  68 2c 3d Tc
+  62 2c 3d 8c
+  51 2c 3d 4d
+ 260 2c 7d Ah
+ 257 2c 7d Kh
+ 172 2c 5d Jh
+ 166 2c 5d 9h
+ 160 2c 5d 7h
+ 110 2c 4d 6h
+ 964 4c Ac Ad
+ 957 4c Kc Kd
+ 397 3c 3d Qc
+ 393 3c 3d Tc
+ 389 3c 3d 8c
+  83 2c 4c 4d
+ 965 4c Ad Ah
+ 960 4c Kd Kh
+ 398 3c 3d Qh
+ 394 3c 3d Th
+ 390 3c 3d 8h
+ 104 2c 4d 4h
+ 272 2c 8c Ac
+ 270 2c 8c Kc
+ 148 2c 5c Qc
+ 144 2c 5c Tc
+ 140 2c 5c 8c
+ 136 2c 5c 6c
+ 133 2c 4d Ad
+ 130 2c 4d Kd
+  75 2c 3d Qd
+  69 2c 3d Td
+  63 2c 3d 8d
+  53 2c 3d 5c
+ 292 2c 8d Ah
+ 289 2c 8d Kh
+ 175 2c 5d Qh
+ 169 2c 5d Th
+ 163 2c 5d 8h
+ 157 2c 5d 6h
+ 983 5c 5d Ac
+ 981 5c 5d Kc
+ 662 3c Jc Jd
+ 613 3c 9c 9d
+ 544 3c 7c 7d
+ 135 2c 5c 5d
+ 984 5c 5d Ah
+ 982 5c 5d Kh
+ 669 3c Jd Jh
+ 624 3c 9d 9h
+ 559 3c 7d 7h
+ 154 2c 5d 5h
+ 302 2c 9c Ac
+ 300 2c 9c Kc
+ 191 2c 6c Jc
+ 187 2c 6c 9c
+ 183 2c 6c 7c
+ 404 3c 4c 5c
+ 153 2c 5c Ad
+ 151 2c 5c Kd
+  97 2c 4c Jd
+  93 2c 4c 9d
+  89 2c 4c 7d
+  54 2c 3d 5d
+ 319 2c 9d Ah
+ 316 2c 9d Kh
+ 214 2c 6d Jh
+ 208 2c 6d 9h
+ 202 2c 6d 7h
+ 427 3c 4d 5h
+1181 5c Ac Ad
+1174 5c Kc Kd
+ 679 3c Qc Qd
+ 640 3c Tc Td
+ 581 3c 8c 8d
+ 182 2c 6c 6d
+1182 5c Ad Ah
+1177 5c Kd Kh
+ 684 3c Qd Qh
+ 649 3c Td Th
+ 594 3c 8d 8h
+ 199 2c 6d 6h
+ 327 2c Tc Ac
+ 325 2c Tc Kc
+ 193 2c 6c Qc
+ 189 2c 6c Tc
+ 185 2c 6c 8c
+ 406 3c 4c 6c
+ 179 2c 5d Ac
+ 176 2c 5d Kc
+  99 2c 4c Qd
+  95 2c 4c Td
+  91 2c 4c 8d
+  56 2c 3d 6c
+ 341 2c Td Ah
+ 338 2c Td Kh
+ 217 2c 6d Qh
+ 211 2c 6d Th
+ 205 2c 6d 8h
+ 430 3c 4d 6h
+1198 6c 6d Ac
+1196 6c 6d Kc
+ 713 4c 4d Jc
+ 709 4c 4d 9c
+ 705 4c 4d 7c
+ 381 3c 3d 4c
+1199 6c 6d Ah
+1197 6c 6d Kh
+ 714 4c 4d Jh
+ 710 4c 4d 9h
+ 706 4c 4d 7h
+ 382 3c 3d 4h
+ 347 2c Jc Ac
+ 345 2c Jc Kc
+ 231 2c 7c Jc
+ 227 2c 7c 9c
+ 225 2c 7c 8c
+ 456 3c 5c 6c
+ 180 2c 5d Ad
+ 177 2c 5d Kd
+ 123 2c 4d Jc
+ 117 2c 4d 9c
+ 111 2c 4d 7c
+  57 2c 3d 6d
+ 358 2c Jd Ah
+ 355 2c Jd Kh
+ 251 2c 7d Jh
+ 245 2c 7d 9h
+ 242 2c 7d 8h
+ 477 3c 5d 6h
+1354 6c Ac Ad
+1347 6c Kc Kd
+ 715 4c 4d Qc
+ 711 4c 4d Tc
+ 707 4c 4d 8c
+ 383 3c 3d 5c
+1355 6c Ad Ah
+1350 6c Kd Kh
+ 716 4c 4d Qh
+ 712 4c 4d Th
+ 708 4c 4d 8h
+ 384 3c 3d 5h
+ 362 2c Qc Ac
+ 360 2c Qc Kc
+ 233 2c 7c Qc
+ 229 2c 7c Tc
+ 408 3c 4c 7c
+ 722 4c 5c 6c
+ 198 2c 6c Ad
+ 196 2c 6c Kd
+ 124 2c 4d Jd
+ 118 2c 4d 9d
+ 112 2c 4d 7d
+  85 2c 4c 5d
+ 370 2c Qd Ah
+ 367 2c Qd Kh
+ 254 2c 7d Qh
+ 248 2c 7d Th
+ 433 3c 4d 7h
+ 743 4c 5d 6h
+1369 7c 7d Ac
+1367 7c 7d Kc
+ 928 4c Jc Jd
+ 879 4c 9c 9d
+ 810 4c 7c 7d
+ 385 3c 3d 6c
+1370 7c 7d Ah
+1368 7c 7d Kh
+ 935 4c Jd Jh
+ 890 4c 9d 9h
+ 825 4c 7d 7h
+ 386 3c 3d 6h
+ 372 2c Kc Ac
+ 420 3c 4c Kc
+ 266 2c 8c Jc
+ 262 2c 8c 9c
+ 410 3c 4c 8c
+ 221 2c 6d Ac
+ 218 2c 6d Kc
+ 126 2c 4d Qc
+ 120 2c 4d Tc
+ 114 2c 4d 8c
+  87 2c 4c 6d
+ 377 2c Kd Ah
+ 451 3c 4d Kh
+ 283 2c 8d Jh
+ 277 2c 8d 9h
+ 436 3c 4d 8h
+1488 7c Ac Ad
+1481 7c Kc Kd
+ 945 4c Qc Qd
+ 906 4c Tc Td
+ 847 4c 8c 8d
+ 403 3c 4c 4d
+1489 7c Ad Ah
+1484 7c Kd Kh
+ 950 4c Qd Qh
+ 915 4c Td Th
+ 860 4c 8d 8h
+ 424 3c 4d 4h
+ 422 3c 4c Ac
+ 470 3c 5c Kc
+ 268 2c 8c Qc
+ 264 2c 8c Tc
+ 458 3c 5c 7c
+ 222 2c 6d Ad
+ 219 2c 6d Kd
+ 127 2c 4d Qd
+ 121 2c 4d Td
+ 115 2c 4d 8d
+ 105 2c 4d 5c
+ 454 3c 4d Ah
+ 498 3c 5d Kh
+ 286 2c 8d Qh
+ 280 2c 8d Th
+ 480 3c 5d 7h
+1501 8c 8d Ac
+1499 8c 8d Kc
+ 977 5c 5d Jc
+ 973 5c 5d 9c
+ 969 5c 5d 7c
+ 455 3c 5c 5d
+1502 8c 8d Ah
+1500 8c 8d Kh
+ 978 5c 5d Jh
+ 974 5c 5d 9h
+ 970 5c 5d 7h
+ 474 3c 5d 5h
+ 472 3c 5c Ac
+ 515 3c 6c Kc
+ 296 2c 9c Jc
+ 294 2c 9c Tc
+ 460 3c 5c 8c
+ 238 2c 7c Ad
+ 236 2c 7c Kd
+ 147 2c 5c Jd
+ 143 2c 5c 9d
+ 139 2c 5c 7d
+ 106 2c 4d 5d
+ 501 3c 5d Ah
+ 540 3c 6d Kh
+ 310 2c 9d Jh
+ 307 2c 9d Th
+ 483 3c 5d 8h
+1588 8c Ac Ad
+1581 8c Kc Kd
+ 979 5c 5d Qc
+ 975 5c 5d Tc
+ 971 5c 5d 8c
+ 502 3c 6c 6d
+1589 8c Ad Ah
+1584 8c Kd Kh
+ 980 5c 5d Qh
+ 976 5c 5d Th
+ 972 5c 5d 8h
+ 519 3c 6d 6h
+ 517 3c 6c Ac
+ 555 3c 7c Kc
+ 298 2c 9c Qc
+ 412 3c 4c 9c
+ 503 3c 6c 7c
+ 258 2c 7d Ac
+ 255 2c 7d Kc
+ 149 2c 5c Qd
+ 145 2c 5c Td
+ 141 2c 5c 8d
+ 108 2c 4d 6c
+ 543 3c 6d Ah
+ 577 3c 7d Kh
+ 313 2c 9d Qh
+ 439 3c 4d 9h
+ 522 3c 6d 7h
+1599 9c 9d Ac
+1597 9c 9d Kc
+1145 5c Jc Jd
+1096 5c 9c 9d
+1027 5c 7c 7d
+ 701 4c 4d 5c
+1600 9c 9d Ah
+1598 9c 9d Kh
+1152 5c Jd Jh
+1107 5c 9d 9h
+1042 5c 7d 7h
+ 702 4c 4d 5h
+ 557 3c 7c Ac
+ 590 3c 8c Kc
+ 321 2c Tc Jc
+ 414 3c 4c Tc
+ 505 3c 6c 8c
+ 259 2c 7d Ad
+ 256 2c 7d Kd
+ 170 2c 5d Jc
+ 164 2c 5d 9c
+ 158 2c 5d 7c
+ 109 2c 4d 6d
+ 580 3c 7d Ah
+ 609 3c 8d Kh
+ 332 2c Td Jh
+ 442 3c 4d Th
+ 525 3c 6d 8h
+1659 9c Ac Ad
+1652 9c Kc Kd
+1162 5c Qc Qd
+1123 5c Tc Td
+1064 5c 8c 8d
+ 703 4c 4d 6c
+1660 9c Ad Ah
+1655 9c Kd Kh
+1167 5c Qd Qh
+1132 5c Td Th
+1077 5c 8d 8h
+ 704 4c 4d 6h
+ 592 3c 8c Ac
+ 620 3c 9c Kc
+ 323 2c Tc Qc
+ 462 3c 5c 9c
+ 545 3c 7c 8c
+ 273 2c 8c Ad
+ 271 2c 8c Kd
+ 171 2c 5d Jd
+ 165 2c 5d 9d
+ 159 2c 5d 7d
+ 137 2c 5c 6d
+ 612 3c 8d Ah
+ 636 3c 9d Kh
+ 335 2c Td Qh
+ 486 3c 5d 9h
+ 562 3c 7d 8h
+1668 Tc Td Ac
+1666 Tc Td Kc
+1192 6c 6d Jc
+1188 6c 6d 9c
+1184 6c 6d 7c
+ 721 4c 5c 5d
+1669 Tc Td Ah
+1667 Tc Td Kh
+1193 6c 6d Jh
+1189 6c 6d 9h
+1185 6c 6d 7h
+ 740 4c 5d 5h
+ 622 3c 9c Ac
+ 645 3c Tc Kc
+ 343 2c Jc Qc
+ 464 3c 5c Tc
+ 724 4c 5c 7c
+ 290 2c 8d Ac
+ 287 2c 8d Kc
+ 173 2c 5d Qc
+ 167 2c 5d Tc
+ 161 2c 5d 8c
+ 155 2c 5d 6c
+ 639 3c 9d Ah
+ 658 3c Td Kh
+ 352 2c Jd Qh
+ 489 3c 5d Th
+ 746 4c 5d 7h
+1706 Tc Ac Ad
+1699 Tc Kc Kd
+1194 6c 6d Qc
+1190 6c 6d Tc
+1186 6c 6d 8c
+ 768 4c 6c 6d
+1707 Tc Ad Ah
+1702 Tc Kd Kh
+1195 6c 6d Qh
+1191 6c 6d Th
+1187 6c 6d 8h
+ 785 4c 6d 6h
+ 647 3c Tc Ac
+ 665 3c Jc Kc
+ 416 3c 4c Jc
+ 507 3c 6c 9c
+ 726 4c 5c 8c
+ 291 2c 8d Ad
+ 288 2c 8d Kd
+ 174 2c 5d Qd
+ 168 2c 5d Td
+ 162 2c 5d 8d
+ 156 2c 5d 6d
+ 661 3c Td Ah
+ 675 3c Jd Kh
+ 445 3c 4d Jh
+ 528 3c 6d 9h
+ 749 4c 5d 8h
+1713 Jc Jd Ac
+1711 Jc Jd Kc
+1318 6c Jc Jd
+1269 6c 9c 9d
+1200 6c 7c 7d
+ 967 5c 5d 6c
+1714 Jc Jd Ah
+1712 Jc Jd Kh
+1325 6c Jd Jh
+1280 6c 9d 9h
+1215 6c 7d 7h
+ 968 5c 5d 6h
+ 667 3c Jc Ac
+ 680 3c Qc Kc
+ 418 3c 4c Qc
+ 509 3c 6c Tc
+ 769 4c 6c 7c
+ 303 2c 9c Ad
+ 301 2c 9c Kd
+ 192 2c 6c Jd
+ 188 2c 6c 9d
+ 184 2c 6c 7d
+ 405 3c 4c 5d
+ 678 3c Jd Ah
+ 687 3c Qd Kh
+ 448 3c 4d Qh
+ 531 3c 6d Th
+ 788 4c 6d 7h
+1734 Jc Ac Ad
+1727 Jc Kc Kd
+1335 6c Qc Qd
+1296 6c Tc Td
+1237 6c 8c 8d
+ 985 5c 6c 6d
+1735 Jc Ad Ah
+1730 Jc Kd Kh
+1340 6c Qd Qh
+1305 6c Td Th
+1250 6c 8d 8h
+1002 5c 6d 6h
+ 682 3c Qc Ac
+ 736 4c 5c Kc
+ 466 3c 5c Jc
+ 547 3c 7c 9c
+ 771 4c 6c 8c
+ 317 2c 9d Ac
+ 314 2c 9d Kc
+ 194 2c 6c Qd
+ 190 2c 6c Td
+ 186 2c 6c 8d
+ 407 3c 4c 6d
+ 690 3c Qd Ah
+ 764 4c 5d Kh
+ 492 3c 5d Jh
+ 565 3c 7d 9h
+ 791 4c 6d 8h
+1739 Qc Qd Ac
+1737 Qc Qd Kc
+1363 7c 7d Jc
+1359 7c 7d 9c
+1357 7c 7d 8c
+1740 Qc Qd Ah
+1738 Qc Qd Kh
+1364 7c 7d Jh
+1360 7c 7d 9h
+1358 7c 7d 8h
+ 692 3c Kc Ac
+ 781 4c 6c Kc
+ 468 3c 5c Qc
+ 549 3c 7c Tc
+ 811 4c 7c 8c
+ 318 2c 9d Ad
+ 315 2c 9d Kd
+ 212 2c 6d Jc
+ 206 2c 6d 9c
+ 200 2c 6d 7c
+ 425 3c 4d 5c
+ 697 3c Kd Ah
+ 806 4c 6d Kh
+ 495 3c 5d Qh
+ 568 3c 7d Th
+ 828 4c 7d 8h
+1748 Qc Ac Ad
+1741 Qc Kc Kd
+1365 7c 7d Qc
+1361 7c 7d Tc
+1371 7c 8c 8d
+1749 Qc Ad Ah
+1744 Qc Kd Kh
+1366 7c 7d Qh
+1362 7c 7d Th
+1384 7c 8d 8h
+ 738 4c 5c Ac
+ 821 4c 7c Kc
+ 511 3c 6c Jc
+ 582 3c 8c 9c
+ 986 5c 6c 7c
+ 328 2c Tc Ad
+ 326 2c Tc Kd
+ 213 2c 6d Jd
+ 207 2c 6d 9d
+ 201 2c 6d 7d
+ 426 3c 4d 5d
+ 767 4c 5d Ah
+ 843 4c 7d Kh
+ 534 3c 6d Jh
+ 597 3c 8d 9h
+1005 5c 6d 7h
+1751 Kc Kd Ac
+1452 7c Jc Jd
+1403 7c 9c 9d
+1752 Kc Kd Ah
+1459 7c Jd Jh
+1414 7c 9d 9h
+ 783 4c 6c Ac
+ 856 4c 8c Kc
+ 513 3c 6c Qc
+ 584 3c 8c Tc
+ 988 5c 6c 8c
+ 339 2c Td Ac
+ 336 2c Td Kc
+ 215 2c 6d Qc
+ 209 2c 6d Tc
+ 203 2c 6d 8c
+ 428 3c 4d 6c
+ 809 4c 6d Ah
+ 875 4c 8d Kh
+ 537 3c 6d Qh
+ 600 3c 8d Th
+1008 5c 6d 8h
+1753 Kc Ac Ad
+1469 7c Qc Qd
+1430 7c Tc Td
+1754 Kc Ad Ah
+1474 7c Qd Qh
+1439 7c Td Th
+ 823 4c 7c Ac
+ 886 4c 9c Kc
+ 551 3c 7c Jc
+ 614 3c 9c Tc
+1028 5c 7c 8c
+ 340 2c Td Ad
+ 337 2c Td Kd
+ 216 2c 6d Qd
+ 210 2c 6d Td
+ 204 2c 6d 8d
+ 429 3c 4d 6d
+ 846 4c 7d Ah
+ 902 4c 9d Kh
+ 571 3c 7d Jh
+ 627 3c 9d Th
+1045 5c 7d 8h
+1495 8c 8d Jc
+1491 8c 8d 9c
+1496 8c 8d Jh
+1492 8c 8d 9h
+ 858 4c 8c Ac
+ 911 4c Tc Kc
+ 553 3c 7c Qc
+ 728 4c 5c 9c
+1201 6c 7c 8c
+ 348 2c Jc Ad
+ 346 2c Jc Kd
+ 232 2c 7c Jd
+ 228 2c 7c 9d
+ 226 2c 7c 8d
+ 457 3c 5c 6d
+ 878 4c 8d Ah
+ 924 4c Td Kh
+ 574 3c 7d Qh
+ 752 4c 5d 9h
+1218 6c 7d 8h
+1497 8c 8d Qc
+1493 8c 8d Tc
+1498 8c 8d Qh
+1494 8c 8d Th
+ 888 4c 9c Ac
+ 931 4c Jc Kc
+ 586 3c 8c Jc
+ 730 4c 5c Tc
+ 356 2c Jd Ac
+ 353 2c Jd Kc
+ 234 2c 7c Qd
+ 230 2c 7c Td
+ 240 2c 7d 8c
+ 475 3c 5d 6c
+ 905 4c 9d Ah
+ 941 4c Jd Kh
+ 603 3c 8d Jh
+ 755 4c 5d Th
+1552 8c Jc Jd
+1503 8c 9c 9d
+1559 8c Jd Jh
+1514 8c 9d 9h
+ 913 4c Tc Ac
+ 946 4c Qc Kc
+ 588 3c 8c Qc
+ 773 4c 6c 9c
+ 357 2c Jd Ad
+ 354 2c Jd Kd
+ 249 2c 7d Jc
+ 243 2c 7d 9c
+ 241 2c 7d 8d
+ 476 3c 5d 6d
+ 927 4c Td Ah
+ 953 4c Qd Kh
+ 606 3c 8d Qh
+ 794 4c 6d 9h
+1569 8c Qc Qd
+1530 8c Tc Td
+1574 8c Qd Qh
+1539 8c Td Th
+ 933 4c Jc Ac
+ 998 5c 6c Kc
+ 616 3c 9c Jc
+ 775 4c 6c Tc
+ 363 2c Qc Ad
+ 361 2c Qc Kd
+ 250 2c 7d Jd
+ 244 2c 7d 9d
+ 409 3c 4c 7d
+ 723 4c 5c 6d
+ 944 4c Jd Ah
+1023 5c 6d Kh
+ 630 3c 9d Jh
+ 797 4c 6d Th
+1593 9c 9d Jc
+1591 9c 9d Tc
+1594 9c 9d Jh
+1592 9c 9d Th
+ 948 4c Qc Ac
+1038 5c 7c Kc
+ 618 3c 9c Qc
+ 813 4c 7c 9c
+ 368 2c Qd Ac
+ 365 2c Qd Kc
+ 252 2c 7d Qc
+ 246 2c 7d Tc
+ 411 3c 4c 8d
+ 741 4c 5d 6c
+ 956 4c Qd Ah
+1060 5c 7d Kh
+ 633 3c 9d Qh
+ 831 4c 7d 9h
+1595 9c 9d Qc
+1601 9c Tc Td
+1596 9c 9d Qh
+1610 9c Td Th
+ 958 4c Kc Ac
+1073 5c 8c Kc
+ 641 3c Tc Jc
+ 815 4c 7c Tc
+ 369 2c Qd Ad
+ 366 2c Qd Kd
+ 253 2c 7d Qd
+ 247 2c 7d Td
+ 431 3c 4d 7c
+ 742 4c 5d 6d
+ 963 4c Kd Ah
+1092 5c 8d Kh
+ 652 3c Td Jh
+ 834 4c 7d Th
+1623 9c Jc Jd
+1630 9c Jd Jh
+1000 5c 6c Ac
+1103 5c 9c Kc
+ 643 3c Tc Qc
+ 848 4c 8c 9c
+ 373 2c Kc Ad
+ 421 3c 4c Kd
+ 267 2c 8c Jd
+ 263 2c 8c 9d
+ 432 3c 4d 7d
+1026 5c 6d Ah
+1119 5c 9d Kh
+ 655 3c Td Qh
+ 863 4c 8d 9h
+1640 9c Qc Qd
+1645 9c Qd Qh
+1040 5c 7c Ac
+1128 5c Tc Kc
+ 663 3c Jc Qc
+ 850 4c 8c Tc
+ 375 2c Kd Ac
+ 449 3c 4d Kc
+ 269 2c 8c Qd
+ 265 2c 8c Td
+ 434 3c 4d 8c
+1063 5c 7d Ah
+1141 5c Td Kh
+ 672 3c Jd Qh
+ 866 4c 8d Th
+1662 Tc Td Jc
+1663 Tc Td Jh
+1075 5c 8c Ac
+1148 5c Jc Kc
+ 732 4c 5c Jc
+ 880 4c 9c Tc
+ 376 2c Kd Ad
+ 450 3c 4d Kd
+ 281 2c 8d Jc
+ 275 2c 8d 9c
+ 435 3c 4d 8d
+1095 5c 8d Ah
+1158 5c Jd Kh
+ 758 4c 5d Jh
+ 893 4c 9d Th
+1664 Tc Td Qc
+1665 Tc Td Qh
+1105 5c 9c Ac
+1163 5c Qc Kc
+ 734 4c 5c Qc
+ 990 5c 6c 9c
+ 423 3c 4c Ad
+ 471 3c 5c Kd
+ 282 2c 8d Jd
+ 276 2c 8d 9d
+ 459 3c 5c 7d
+1122 5c 9d Ah
+1170 5c Qd Kh
+ 761 4c 5d Qh
+1011 5c 6d 9h
+1670 Tc Jc Jd
+1677 Tc Jd Jh
+1130 5c Tc Ac
+1211 6c 7c Kc
+ 777 4c 6c Jc
+ 992 5c 6c Tc
+ 452 3c 4d Ac
+ 496 3c 5d Kc
+ 284 2c 8d Qc
+ 278 2c 8d Tc
+ 461 3c 5c 8d
+1144 5c Td Ah
+1233 6c 7d Kh
+ 800 4c 6d Jh
+1014 5c 6d Th
+1687 Tc Qc Qd
+1692 Tc Qd Qh
+1150 5c Jc Ac
+1246 6c 8c Kc
+ 779 4c 6c Qc
+1030 5c 7c 9c
+ 453 3c 4d Ad
+ 497 3c 5d Kd
+ 285 2c 8d Qd
+ 279 2c 8d Td
+ 478 3c 5d 7c
+1161 5c Jd Ah
+1265 6c 8d Kh
+ 803 4c 6d Qh
+1048 5c 7d 9h
+1709 Jc Jd Qc
+1710 Jc Jd Qh
+1165 5c Qc Ac
+1276 6c 9c Kc
+ 817 4c 7c Jc
+1032 5c 7c Tc
+ 473 3c 5c Ad
+ 516 3c 6c Kd
+ 297 2c 9c Jd
+ 295 2c 9c Td
+ 479 3c 5d 7d
+1173 5c Qd Ah
+1292 6c 9d Kh
+ 837 4c 7d Jh
+1051 5c 7d Th
+1715 Jc Qc Qd
+1720 Jc Qd Qh
+1175 5c Kc Ac
+1301 6c Tc Kc
+ 819 4c 7c Qc
+1065 5c 8c 9c
+ 499 3c 5d Ac
+ 538 3c 6d Kc
+ 299 2c 9c Qd
+ 305 2c 9d Tc
+ 481 3c 5d 8c
+1180 5c Kd Ah
+1314 6c Td Kh
+ 840 4c 7d Qh
+1080 5c 8d 9h
+1213 6c 7c Ac
+1321 6c Jc Kc
+ 852 4c 8c Jc
+1067 5c 8c Tc
+ 500 3c 5d Ad
+ 539 3c 6d Kd
+ 308 2c 9d Jc
+ 306 2c 9d Td
+ 482 3c 5d 8d
+1236 6c 7d Ah
+1331 6c Jd Kh
+ 869 4c 8d Jh
+1083 5c 8d Th
+1248 6c 8c Ac
+1336 6c Qc Kc
+ 854 4c 8c Qc
+1097 5c 9c Tc
+ 518 3c 6c Ad
+ 556 3c 7c Kd
+ 309 2c 9d Jd
+ 413 3c 4c 9d
+ 504 3c 6c 7d
+1268 6c 8d Ah
+1343 6c Qd Kh
+ 872 4c 8d Qh
+1110 5c 9d Th
+1278 6c 9c Ac
+1380 7c 8c Kc
+ 882 4c 9c Jc
+1203 6c 7c 9c
+ 541 3c 6d Ac
+ 575 3c 7d Kc
+ 311 2c 9d Qc
+ 415 3c 4c Td
+ 506 3c 6c 8d
+1295 6c 9d Ah
+1399 7c 8d Kh
+ 896 4c 9d Jh
+1221 6c 7d 9h
+1303 6c Tc Ac
+1410 7c 9c Kc
+ 884 4c 9c Qc
+1205 6c 7c Tc
+ 542 3c 6d Ad
+ 576 3c 7d Kd
+ 312 2c 9d Qd
+ 437 3c 4d 9c
+ 520 3c 6d 7c
+1317 6c Td Ah
+1426 7c 9d Kh
+ 899 4c 9d Qh
+1224 6c 7d Th
+1323 6c Jc Ac
+1435 7c Tc Kc
+ 907 4c Tc Jc
+1238 6c 8c 9c
+ 558 3c 7c Ad
+ 591 3c 8c Kd
+ 322 2c Tc Jd
+ 438 3c 4d 9d
+ 521 3c 6d 7d
+1334 6c Jd Ah
+1448 7c Td Kh
+ 918 4c Td Jh
+1253 6c 8d 9h
+1338 6c Qc Ac
+1455 7c Jc Kc
+ 909 4c Tc Qc
+1240 6c 8c Tc
+ 578 3c 7d Ac
+ 607 3c 8d Kc
+ 324 2c Tc Qd
+ 440 3c 4d Tc
+ 523 3c 6d 8c
+1346 6c Qd Ah
+1465 7c Jd Kh
+ 921 4c Td Qh
+1256 6c 8d Th
+1348 6c Kc Ac
+1470 7c Qc Kc
+ 929 4c Jc Qc
+1270 6c 9c Tc
+ 579 3c 7d Ad
+ 608 3c 8d Kd
+ 330 2c Td Jc
+ 441 3c 4d Td
+ 524 3c 6d 8d
+1353 6c Kd Ah
+1477 7c Qd Kh
+ 938 4c Jd Qh
+1283 6c 9d Th
+1382 7c 8c Ac
+1510 8c 9c Kc
+ 994 5c 6c Jc
+1372 7c 8c 9c
+ 593 3c 8c Ad
+ 621 3c 9c Kd
+ 331 2c Td Jd
+ 463 3c 5c 9d
+ 546 3c 7c 8d
+1402 7c 8d Ah
+1526 8c 9d Kh
+1017 5c 6d Jh
+1387 7c 8d 9h
+1412 7c 9c Ac
+1535 8c Tc Kc
+ 996 5c 6c Qc
+1374 7c 8c Tc
+ 610 3c 8d Ac
+ 634 3c 9d Kc
+ 333 2c Td Qc
+ 465 3c 5c Td
+ 560 3c 7d 8c
+1429 7c 9d Ah
+1548 8c Td Kh
+1020 5c 6d Qh
+1390 7c 8d Th
+1437 7c Tc Ac
+1555 8c Jc Kc
+1034 5c 7c Jc
+1404 7c 9c Tc
+ 611 3c 8d Ad
+ 635 3c 9d Kd
+ 334 2c Td Qd
+ 484 3c 5d 9c
+ 561 3c 7d 8d
+1451 7c Td Ah
+1565 8c Jd Kh
+1054 5c 7d Jh
+1417 7c 9d Th
+1457 7c Jc Ac
+1570 8c Qc Kc
+1036 5c 7c Qc
+1504 8c 9c Tc
+ 623 3c 9c Ad
+ 646 3c Tc Kd
+ 344 2c Jc Qd
+ 485 3c 5d 9d
+ 725 4c 5c 7d
+1468 7c Jd Ah
+1577 8c Qd Kh
+1057 5c 7d Qh
+1517 8c 9d Th
+1472 7c Qc Ac
+1606 9c Tc Kc
+1069 5c 8c Jc
+ 637 3c 9d Ac
+ 656 3c Td Kc
+ 350 2c Jd Qc
+ 487 3c 5d Tc
+ 727 4c 5c 8d
+1480 7c Qd Ah
+1619 9c Td Kh
+1086 5c 8d Jh
+1482 7c Kc Ac
+1626 9c Jc Kc
+1071 5c 8c Qc
+ 638 3c 9d Ad
+ 657 3c Td Kd
+ 351 2c Jd Qd
+ 488 3c 5d Td
+ 744 4c 5d 7c
+1487 7c Kd Ah
+1636 9c Jd Kh
+1089 5c 8d Qh
+1512 8c 9c Ac
+1641 9c Qc Kc
+1099 5c 9c Jc
+ 648 3c Tc Ad
+ 666 3c Jc Kd
+ 417 3c 4c Jd
+ 508 3c 6c 9d
+ 745 4c 5d 7d
+1529 8c 9d Ah
+1648 9c Qd Kh
+1113 5c 9d Jh
+1537 8c Tc Ac
+1673 Tc Jc Kc
+1101 5c 9c Qc
+ 659 3c Td Ac
+ 673 3c Jd Kc
+ 419 3c 4c Qd
+ 510 3c 6c Td
+ 747 4c 5d 8c
+1551 8c Td Ah
+1683 Tc Jd Kh
+1116 5c 9d Qh
+1557 8c Jc Ac
+1688 Tc Qc Kc
+1124 5c Tc Jc
+ 660 3c Td Ad
+ 674 3c Jd Kd
+ 443 3c 4d Jc
+ 526 3c 6d 9c
+ 748 4c 5d 8d
+1568 8c Jd Ah
+1695 Tc Qd Kh
+1135 5c Td Jh
+1572 8c Qc Ac
+1716 Jc Qc Kc
+1126 5c Tc Qc
+ 668 3c Jc Ad
+ 681 3c Qc Kd
+ 444 3c 4d Jd
+ 527 3c 6d 9d
+ 770 4c 6c 7d
+1580 8c Qd Ah
+1723 Jc Qd Kh
+1138 5c Td Qh
+1582 8c Kc Ac
+1146 5c Jc Qc
+ 676 3c Jd Ac
+ 685 3c Qd Kc
+ 446 3c 4d Qc
+ 529 3c 6d Tc
+ 772 4c 6c 8d
+1587 8c Kd Ah
+1155 5c Jd Qh
+1608 9c Tc Ac
+1207 6c 7c Jc
+ 677 3c Jd Ad
+ 686 3c Qd Kd
+ 447 3c 4d Qd
+ 530 3c 6d Td
+ 786 4c 6d 7c
+1622 9c Td Ah
+1227 6c 7d Jh
+1628 9c Jc Ac
+1209 6c 7c Qc
+ 683 3c Qc Ad
+ 737 4c 5c Kd
+ 467 3c 5c Jd
+ 548 3c 7c 9d
+ 787 4c 6d 7d
+1639 9c Jd Ah
+1230 6c 7d Qh
+1643 9c Qc Ac
+1242 6c 8c Jc
+ 688 3c Qd Ac
+ 762 4c 5d Kc
+ 469 3c 5c Qd
+ 550 3c 7c Td
+ 789 4c 6d 8c
+1651 9c Qd Ah
+1259 6c 8d Jh
+1653 9c Kc Ac
+1244 6c 8c Qc
+ 689 3c Qd Ad
+ 763 4c 5d Kd
+ 490 3c 5d Jc
+ 563 3c 7d 9c
+ 790 4c 6d 8d
+1658 9c Kd Ah
+1262 6c 8d Qh
+1675 Tc Jc Ac
+1272 6c 9c Jc
+ 693 3c Kc Ad
+ 782 4c 6c Kd
+ 491 3c 5d Jd
+ 564 3c 7d 9d
+ 812 4c 7c 8d
+1686 Tc Jd Ah
+1286 6c 9d Jh
+1690 Tc Qc Ac
+1274 6c 9c Qc
+ 695 3c Kd Ac
+ 804 4c 6d Kc
+ 493 3c 5d Qc
+ 566 3c 7d Tc
+ 826 4c 7d 8c
+1698 Tc Qd Ah
+1289 6c 9d Qh
+1700 Tc Kc Ac
+1297 6c Tc Jc
+ 696 3c Kd Ad
+ 805 4c 6d Kd
+ 494 3c 5d Qd
+ 567 3c 7d Td
+ 827 4c 7d 8d
+1705 Tc Kd Ah
+1308 6c Td Jh
+1718 Jc Qc Ac
+1299 6c Tc Qc
+ 739 4c 5c Ad
+ 822 4c 7c Kd
+ 512 3c 6c Jd
+ 583 3c 8c 9d
+ 987 5c 6c 7d
+1726 Jc Qd Ah
+1311 6c Td Qh
+1728 Jc Kc Ac
+1319 6c Jc Qc
+ 765 4c 5d Ac
+ 841 4c 7d Kc
+ 514 3c 6c Qd
+ 585 3c 8c Td
+ 989 5c 6c 8d
+1733 Jc Kd Ah
+1328 6c Jd Qh
+1742 Qc Kc Ac
+1376 7c 8c Jc
+ 766 4c 5d Ad
+ 842 4c 7d Kd
+ 532 3c 6d Jc
+ 595 3c 8d 9c
+1003 5c 6d 7c
+1747 Qc Kd Ah
+1393 7c 8d Jh
+1378 7c 8c Qc
+ 784 4c 6c Ad
+ 857 4c 8c Kd
+ 533 3c 6d Jd
+ 596 3c 8d 9d
+1004 5c 6d 7d
+1396 7c 8d Qh
+1406 7c 9c Jc
+ 807 4c 6d Ac
+ 873 4c 8d Kc
+ 535 3c 6d Qc
+ 598 3c 8d Tc
+1006 5c 6d 8c
+1420 7c 9d Jh
+1408 7c 9c Qc
+ 808 4c 6d Ad
+ 874 4c 8d Kd
+ 536 3c 6d Qd
+ 599 3c 8d Td
+1007 5c 6d 8d
+1423 7c 9d Qh
+1431 7c Tc Jc
+ 824 4c 7c Ad
+ 887 4c 9c Kd
+ 552 3c 7c Jd
+ 615 3c 9c Td
+1029 5c 7c 8d
+1442 7c Td Jh
+1433 7c Tc Qc
+ 844 4c 7d Ac
+ 900 4c 9d Kc
+ 554 3c 7c Qd
+ 625 3c 9d Tc
+1043 5c 7d 8c
+1445 7c Td Qh
+1453 7c Jc Qc
+ 845 4c 7d Ad
+ 901 4c 9d Kd
+ 569 3c 7d Jc
+ 626 3c 9d Td
+1044 5c 7d 8d
+1462 7c Jd Qh
+1506 8c 9c Jc
+ 859 4c 8c Ad
+ 912 4c Tc Kd
+ 570 3c 7d Jd
+ 729 4c 5c 9d
+1202 6c 7c 8d
+1520 8c 9d Jh
+1508 8c 9c Qc
+ 876 4c 8d Ac
+ 922 4c Td Kc
+ 572 3c 7d Qc
+ 731 4c 5c Td
+1216 6c 7d 8c
+1523 8c 9d Qh
+1531 8c Tc Jc
+ 877 4c 8d Ad
+ 923 4c Td Kd
+ 573 3c 7d Qd
+ 750 4c 5d 9c
+1217 6c 7d 8d
+1542 8c Td Jh
+1533 8c Tc Qc
+ 889 4c 9c Ad
+ 932 4c Jc Kd
+ 587 3c 8c Jd
+ 751 4c 5d 9d
+1545 8c Td Qh
+1553 8c Jc Qc
+ 903 4c 9d Ac
+ 939 4c Jd Kc
+ 589 3c 8c Qd
+ 753 4c 5d Tc
+1562 8c Jd Qh
+1602 9c Tc Jc
+ 904 4c 9d Ad
+ 940 4c Jd Kd
+ 601 3c 8d Jc
+ 754 4c 5d Td
+1613 9c Td Jh
+1604 9c Tc Qc
+ 914 4c Tc Ad
+ 947 4c Qc Kd
+ 602 3c 8d Jd
+ 774 4c 6c 9d
+1616 9c Td Qh
+1624 9c Jc Qc
+ 925 4c Td Ac
+ 951 4c Qd Kc
+ 604 3c 8d Qc
+ 776 4c 6c Td
+1633 9c Jd Qh
+1671 Tc Jc Qc
+ 926 4c Td Ad
+ 952 4c Qd Kd
+ 605 3c 8d Qd
+ 792 4c 6d 9c
+1680 Tc Jd Qh
+ 934 4c Jc Ad
+ 999 5c 6c Kd
+ 617 3c 9c Jd
+ 793 4c 6d 9d
+ 942 4c Jd Ac
+1021 5c 6d Kc
+ 619 3c 9c Qd
+ 795 4c 6d Tc
+ 943 4c Jd Ad
+1022 5c 6d Kd
+ 628 3c 9d Jc
+ 796 4c 6d Td
+ 949 4c Qc Ad
+1039 5c 7c Kd
+ 629 3c 9d Jd
+ 814 4c 7c 9d
+ 954 4c Qd Ac
+1058 5c 7d Kc
+ 631 3c 9d Qc
+ 816 4c 7c Td
+ 955 4c Qd Ad
+1059 5c 7d Kd
+ 632 3c 9d Qd
+ 829 4c 7d 9c
+ 959 4c Kc Ad
+1074 5c 8c Kd
+ 642 3c Tc Jd
+ 830 4c 7d 9d
+ 961 4c Kd Ac
+1090 5c 8d Kc
+ 644 3c Tc Qd
+ 832 4c 7d Tc
+ 962 4c Kd Ad
+1091 5c 8d Kd
+ 650 3c Td Jc
+ 833 4c 7d Td
+1001 5c 6c Ad
+1104 5c 9c Kd
+ 651 3c Td Jd
+ 849 4c 8c 9d
+1024 5c 6d Ac
+1117 5c 9d Kc
+ 653 3c Td Qc
+ 851 4c 8c Td
+1025 5c 6d Ad
+1118 5c 9d Kd
+ 654 3c Td Qd
+ 861 4c 8d 9c
+1041 5c 7c Ad
+1129 5c Tc Kd
+ 664 3c Jc Qd
+ 862 4c 8d 9d
+1061 5c 7d Ac
+1139 5c Td Kc
+ 670 3c Jd Qc
+ 864 4c 8d Tc
+1062 5c 7d Ad
+1140 5c Td Kd
+ 671 3c Jd Qd
+ 865 4c 8d Td
+1076 5c 8c Ad
+1149 5c Jc Kd
+ 733 4c 5c Jd
+ 881 4c 9c Td
+1093 5c 8d Ac
+1156 5c Jd Kc
+ 735 4c 5c Qd
+ 891 4c 9d Tc
+1094 5c 8d Ad
+1157 5c Jd Kd
+ 756 4c 5d Jc
+ 892 4c 9d Td
+1106 5c 9c Ad
+1164 5c Qc Kd
+ 757 4c 5d Jd
+ 991 5c 6c 9d
+1120 5c 9d Ac
+1168 5c Qd Kc
+ 759 4c 5d Qc
+ 993 5c 6c Td
+1121 5c 9d Ad
+1169 5c Qd Kd
+ 760 4c 5d Qd
+1009 5c 6d 9c
+1131 5c Tc Ad
+1212 6c 7c Kd
+ 778 4c 6c Jd
+1010 5c 6d 9d
+1142 5c Td Ac
+1231 6c 7d Kc
+ 780 4c 6c Qd
+1012 5c 6d Tc
+1143 5c Td Ad
+1232 6c 7d Kd
+ 798 4c 6d Jc
+1013 5c 6d Td
+1151 5c Jc Ad
+1247 6c 8c Kd
+ 799 4c 6d Jd
+1031 5c 7c 9d
+1159 5c Jd Ac
+1263 6c 8d Kc
+ 801 4c 6d Qc
+1033 5c 7c Td
+1160 5c Jd Ad
+1264 6c 8d Kd
+ 802 4c 6d Qd
+1046 5c 7d 9c
+1166 5c Qc Ad
+1277 6c 9c Kd
+ 818 4c 7c Jd
+1047 5c 7d 9d
+1171 5c Qd Ac
+1290 6c 9d Kc
+ 820 4c 7c Qd
+1049 5c 7d Tc
+1172 5c Qd Ad
+1291 6c 9d Kd
+ 835 4c 7d Jc
+1050 5c 7d Td
+1176 5c Kc Ad
+1302 6c Tc Kd
+ 836 4c 7d Jd
+1066 5c 8c 9d
+1178 5c Kd Ac
+1312 6c Td Kc
+ 838 4c 7d Qc
+1068 5c 8c Td
+1179 5c Kd Ad
+1313 6c Td Kd
+ 839 4c 7d Qd
+1078 5c 8d 9c
+1214 6c 7c Ad
+1322 6c Jc Kd
+ 853 4c 8c Jd
+1079 5c 8d 9d
+1234 6c 7d Ac
+1329 6c Jd Kc
+ 855 4c 8c Qd
+1081 5c 8d Tc
+1235 6c 7d Ad
+1330 6c Jd Kd
+ 867 4c 8d Jc
+1082 5c 8d Td
+1249 6c 8c Ad
+1337 6c Qc Kd
+ 868 4c 8d Jd
+1098 5c 9c Td
+1266 6c 8d Ac
+1341 6c Qd Kc
+ 870 4c 8d Qc
+1108 5c 9d Tc
+1267 6c 8d Ad
+1342 6c Qd Kd
+ 871 4c 8d Qd
+1109 5c 9d Td
+1279 6c 9c Ad
+1381 7c 8c Kd
+ 883 4c 9c Jd
+1204 6c 7c 9d
+1293 6c 9d Ac
+1397 7c 8d Kc
+ 885 4c 9c Qd
+1206 6c 7c Td
+1294 6c 9d Ad
+1398 7c 8d Kd
+ 894 4c 9d Jc
+1219 6c 7d 9c
+1304 6c Tc Ad
+1411 7c 9c Kd
+ 895 4c 9d Jd
+1220 6c 7d 9d
+1315 6c Td Ac
+1424 7c 9d Kc
+ 897 4c 9d Qc
+1222 6c 7d Tc
+1316 6c Td Ad
+1425 7c 9d Kd
+ 898 4c 9d Qd
+1223 6c 7d Td
+1324 6c Jc Ad
+1436 7c Tc Kd
+ 908 4c Tc Jd
+1239 6c 8c 9d
+1332 6c Jd Ac
+1446 7c Td Kc
+ 910 4c Tc Qd
+1241 6c 8c Td
+1333 6c Jd Ad
+1447 7c Td Kd
+ 916 4c Td Jc
+1251 6c 8d 9c
+1339 6c Qc Ad
+1456 7c Jc Kd
+ 917 4c Td Jd
+1252 6c 8d 9d
+1344 6c Qd Ac
+1463 7c Jd Kc
+ 919 4c Td Qc
+1254 6c 8d Tc
+1345 6c Qd Ad
+1464 7c Jd Kd
+ 920 4c Td Qd
+1255 6c 8d Td
+1349 6c Kc Ad
+1471 7c Qc Kd
+ 930 4c Jc Qd
+1271 6c 9c Td
+1351 6c Kd Ac
+1475 7c Qd Kc
+ 936 4c Jd Qc
+1281 6c 9d Tc
+1352 6c Kd Ad
+1476 7c Qd Kd
+ 937 4c Jd Qd
+1282 6c 9d Td
+1383 7c 8c Ad
+1511 8c 9c Kd
+ 995 5c 6c Jd
+1373 7c 8c 9d
+1400 7c 8d Ac
+1524 8c 9d Kc
+ 997 5c 6c Qd
+1375 7c 8c Td
+1401 7c 8d Ad
+1525 8c 9d Kd
+1015 5c 6d Jc
+1385 7c 8d 9c
+1413 7c 9c Ad
+1536 8c Tc Kd
+1016 5c 6d Jd
+1386 7c 8d 9d
+1427 7c 9d Ac
+1546 8c Td Kc
+1018 5c 6d Qc
+1388 7c 8d Tc
+1428 7c 9d Ad
+1547 8c Td Kd
+1019 5c 6d Qd
+1389 7c 8d Td
+1438 7c Tc Ad
+1556 8c Jc Kd
+1035 5c 7c Jd
+1405 7c 9c Td
+1449 7c Td Ac
+1563 8c Jd Kc
+1037 5c 7c Qd
+1415 7c 9d Tc
+1450 7c Td Ad
+1564 8c Jd Kd
+1052 5c 7d Jc
+1416 7c 9d Td
+1458 7c Jc Ad
+1571 8c Qc Kd
+1053 5c 7d Jd
+1505 8c 9c Td
+1466 7c Jd Ac
+1575 8c Qd Kc
+1055 5c 7d Qc
+1515 8c 9d Tc
+1467 7c Jd Ad
+1576 8c Qd Kd
+1056 5c 7d Qd
+1516 8c 9d Td
+1473 7c Qc Ad
+1607 9c Tc Kd
+1070 5c 8c Jd
+1478 7c Qd Ac
+1617 9c Td Kc
+1072 5c 8c Qd
+1479 7c Qd Ad
+1618 9c Td Kd
+1084 5c 8d Jc
+1483 7c Kc Ad
+1627 9c Jc Kd
+1085 5c 8d Jd
+1485 7c Kd Ac
+1634 9c Jd Kc
+1087 5c 8d Qc
+1486 7c Kd Ad
+1635 9c Jd Kd
+1088 5c 8d Qd
+1513 8c 9c Ad
+1642 9c Qc Kd
+1100 5c 9c Jd
+1527 8c 9d Ac
+1646 9c Qd Kc
+1102 5c 9c Qd
+1528 8c 9d Ad
+1647 9c Qd Kd
+1111 5c 9d Jc
+1538 8c Tc Ad
+1674 Tc Jc Kd
+1112 5c 9d Jd
+1549 8c Td Ac
+1681 Tc Jd Kc
+1114 5c 9d Qc
+1550 8c Td Ad
+1682 Tc Jd Kd
+1115 5c 9d Qd
+1558 8c Jc Ad
+1689 Tc Qc Kd
+1125 5c Tc Jd
+1566 8c Jd Ac
+1693 Tc Qd Kc
+1127 5c Tc Qd
+1567 8c Jd Ad
+1694 Tc Qd Kd
+1133 5c Td Jc
+1573 8c Qc Ad
+1717 Jc Qc Kd
+1134 5c Td Jd
+1578 8c Qd Ac
+1721 Jc Qd Kc
+1136 5c Td Qc
+1579 8c Qd Ad
+1722 Jc Qd Kd
+1137 5c Td Qd
+1583 8c Kc Ad
+1147 5c Jc Qd
+1585 8c Kd Ac
+1153 5c Jd Qc
+1586 8c Kd Ad
+1154 5c Jd Qd
+1609 9c Tc Ad
+1208 6c 7c Jd
+1620 9c Td Ac
+1210 6c 7c Qd
+1621 9c Td Ad
+1225 6c 7d Jc
+1629 9c Jc Ad
+1226 6c 7d Jd
+1637 9c Jd Ac
+1228 6c 7d Qc
+1638 9c Jd Ad
+1229 6c 7d Qd
+1644 9c Qc Ad
+1243 6c 8c Jd
+1649 9c Qd Ac
+1245 6c 8c Qd
+1650 9c Qd Ad
+1257 6c 8d Jc
+1654 9c Kc Ad
+1258 6c 8d Jd
+1656 9c Kd Ac
+1260 6c 8d Qc
+1657 9c Kd Ad
+1261 6c 8d Qd
+1676 Tc Jc Ad
+1273 6c 9c Jd
+1684 Tc Jd Ac
+1275 6c 9c Qd
+1685 Tc Jd Ad
+1284 6c 9d Jc
+1691 Tc Qc Ad
+1285 6c 9d Jd
+1696 Tc Qd Ac
+1287 6c 9d Qc
+1697 Tc Qd Ad
+1288 6c 9d Qd
+1701 Tc Kc Ad
+1298 6c Tc Jd
+1703 Tc Kd Ac
+1300 6c Tc Qd
+1704 Tc Kd Ad
+1306 6c Td Jc
+1719 Jc Qc Ad
+1307 6c Td Jd
+1724 Jc Qd Ac
+1309 6c Td Qc
+1725 Jc Qd Ad
+1310 6c Td Qd
+1729 Jc Kc Ad
+1320 6c Jc Qd
+1731 Jc Kd Ac
+1326 6c Jd Qc
+1732 Jc Kd Ad
+1327 6c Jd Qd
+1743 Qc Kc Ad
+1377 7c 8c Jd
+1745 Qc Kd Ac
+1379 7c 8c Qd
+1746 Qc Kd Ad
+1391 7c 8d Jc
+1392 7c 8d Jd
+1394 7c 8d Qc
+1395 7c 8d Qd
+1407 7c 9c Jd
+1409 7c 9c Qd
+1418 7c 9d Jc
+1419 7c 9d Jd
+1421 7c 9d Qc
+1422 7c 9d Qd
+1432 7c Tc Jd
+1434 7c Tc Qd
+1440 7c Td Jc
+1441 7c Td Jd
+1443 7c Td Qc
+1444 7c Td Qd
+1454 7c Jc Qd
+1460 7c Jd Qc
+1461 7c Jd Qd
+1507 8c 9c Jd
+1509 8c 9c Qd
+1518 8c 9d Jc
+1519 8c 9d Jd
+1521 8c 9d Qc
+1522 8c 9d Qd
+1532 8c Tc Jd
+1534 8c Tc Qd
+1540 8c Td Jc
+1541 8c Td Jd
+1543 8c Td Qc
+1544 8c Td Qd
+1554 8c Jc Qd
+1560 8c Jd Qc
+1561 8c Jd Qd
+1603 9c Tc Jd
+1605 9c Tc Qd
+1611 9c Td Jc
+1612 9c Td Jd
+1614 9c Td Qc
+1615 9c Td Qd
+1625 9c Jc Qd
+1631 9c Jd Qc
+1632 9c Jd Qd
+1672 Tc Jc Qd
+1678 Tc Jd Qc
+1679 Tc Jd Qd
