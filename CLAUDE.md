@@ -302,6 +302,70 @@ Recovery semantics: kill -9 on a shard is safe — atomic `.tmp → rename` writ
 **Known tuning gaps** (small, to address before/during the full run):
 - `COMPRESS_THRESHOLD_GB` is a hardcoded 18.0 (`dataset_driver.rs:279`). On svl8's 503 GB RAM it should be raised to never trigger. Affects only the handful of SRP rainbow flops that cross the threshold.
 
+## SLURM job arrays (Stanford SC cluster)
+
+The dataset workload is embarrassingly parallel across stratified-order flops, atomic on write, and resumable via file-presence — so it maps cleanly onto a SLURM job array. The pattern:
+
+- **Outer parallelism (across nodes):** `sbatch --array=0-(N-1)` launches N independent jobs. Each gets a disjoint contiguous slice of the 1755 stratified flops via `FLOP_START` / `FLOP_LIMIT`. No SLURM-side coordination needed.
+- **Inner parallelism (within a node):** each array task runs `run_production.sh` on its allocated node, which itself does NUMA-aware per-matchup oversubscription (4BP=8 shards/node, 3BP=4, SRP=1).
+- **Coordination:** shared filesystem (sailhome home dirs work, but a project-share is better for throughput) + atomic `.tmp → rename` writes + file-presence skip. Two tasks accidentally targeting overlapping flops cost extra wallclock but cannot corrupt output.
+- **Preemption-safe:** `#SBATCH --requeue` plus the resume semantics means a preempted task restarts from the next un-done flop with seconds of wasted work.
+
+Submit script: `scripts/slurm_array.sh` (fill in `--account`, `--partition`, walltime before first use).
+
+### Resource request sizing
+
+Per task (one node):
+
+| Resource | Value | Why |
+|---|---|---|
+| `--cpus-per-task` | 36–72 (all of one node) | Solver uses every available thread within an NUMA-pinned shard. |
+| `--mem` | 64 G minimum, 128 G recommended | SRP peak ~17 GB × 2 NUMA shards + OS/buffer; smaller fits if running 4BP-only. |
+| `--gres=gpu` | **omit** | Workload is pure CPU. GPU partitions just waste your group's allocation. |
+| `--time` | see table below | Walltime per task ≈ (slice_size × matchup_mix_time) ÷ shard_parallelism. |
+
+Walltime per task ≈ how long it takes one node to chew through `WINDOW = ⌈1755 / array_size⌉` flops. On a Xeon Gold 5220-class node, single-shard per-spot times: 4BP ~3 s, 3BP ~23 s, SRP ~145 s. With per-matchup oversubscription, *effective* per-spot wall-clock on a 2-NUMA node:
+
+| Matchup | Single-shard | × shards/node × NUMA | Effective per-spot |
+|---|---|---|---|
+| 4BP | 3 s | × 16 | ~0.2 s |
+| 3BP | 23 s | × 8 | ~3 s |
+| SRP | 145 s | × 2 | ~73 s |
+
+So a slice of `W` flops × all 3 matchups ≈ `0.2W + 3W + 73W ≈ 76W` seconds, dominated by SRP. Sizing examples:
+
+| `--array` size | Slice size | Walltime / task | Total wallclock if all nodes start together |
+|---|---|---|---|
+| 10 | ~176 flops | ~3.7 h | ~4 h |
+| 20 | ~88 flops | ~1.9 h | ~2 h |
+| 40 | ~44 flops | ~1 h | ~1 h |
+| 80 | ~22 flops | ~30 min | ~30 min |
+
+The right pick depends on (a) the partition's max concurrent jobs per user, and (b) how long jobs sit in queue vs run. **Recommended default: `--array=0-19%10`** (20 slices, 10 running at once) — usually within group quotas, and 10 nodes brings full-tier from ~85 h on one box to ~4 h.
+
+### Single-matchup arrays (faster iteration)
+
+For early-iteration runs on just 4BP / 3BP (so downstream LLM work can start while SRP is still solving), submit per-matchup:
+
+```sh
+# 4BP only — one node handles all 1755 in ~10 min, no array needed
+sbatch --array=0-0 --time=00:30:00 --export=ALL,MATCHUPS=4BP scripts/slurm_array.sh
+
+# 3BP only — 10 nodes × ~18 min each
+sbatch --array=0-9 --time=01:00:00 --export=ALL,MATCHUPS=3BP scripts/slurm_array.sh
+
+# SRP only — the big one; 20+ nodes
+sbatch --array=0-19%20 --time=03:00:00 --export=ALL,MATCHUPS=SRP scripts/slurm_array.sh
+```
+
+### Output / log paths
+
+- `logs/slurm_<jobid>_<taskid>.out` — SLURM stdout (the array task's view)
+- `logs/<matchup>_node<N>_shard<S>.log` — per-shard driver stdout (inside `run_production.sh`)
+- `data/solves/<matchup>/<idx>_<flop>.{jsonl,meta}` — actual dataset output
+
+Put `data/solves/` on the fastest writable shared filesystem you have access to. Atomic writes are fsync-bounded, so a slow NFS hurts throughput more than you'd expect.
+
 ## Repository state
 
 - **Branch:** `main`. All infrastructure committed.
