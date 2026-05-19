@@ -286,14 +286,21 @@ Launcher: `scripts/run_production.sh <tier> [matchups]`. It:
 1. Builds `dataset_driver` in release mode (target-cpu=native picks up AVX-512 on this host).
 2. Sanity-checks the binary for AVX-512 instructions via `objdump`.
 3. Verifies `data/hu_200bb_ranges.txt` + `data/canonical_flops_stratified.txt` exist (generates the latter if missing).
-4. Auto-detects NUMA topology and launches **one driver per NUMA node**, each pinned with `numactl --cpunodebind=N --membind=N` and `RAYON_NUM_THREADS=<cpus on that node>`. Shards stripe over stratified order via `SHARD_INDEX` / `SHARD_COUNT`.
-5. Logs per shard to `logs/shard_<N>.log`. Waits for all to finish, then runs `verify_dataset`.
+4. Auto-detects NUMA topology, then runs matchups **sequentially in phases** (default order `4BP → 3BP → SRP`, fast→slow). Within each phase, launches `SHARDS_PER_NODE_<matchup> × NUMA_NODES` shards in parallel; each shard pinned via `numactl --physcpubind=<cpu-subset> --membind=<node>` to a disjoint CPU subset of its NUMA node. All shards in a phase stripe over the stratified flop list via `SHARD_INDEX` / `SHARD_COUNT`.
+5. Logs per shard to `logs/<matchup>_node<N>_shard<S>.log`. Waits for each phase to finish before the next; after all phases, runs `verify_dataset`.
 
-Recovery semantics: kill -9 on a shard is safe — atomic `.tmp → rename` writes mean half-written `.jsonl` files cannot exist. Restart with the same tier; file-presence check skips done spots.
+**Default per-matchup oversubscription** (override via env vars):
 
-**Known tuning gaps** (un-done as of this writing — to address before kicking off the full run):
-- One-shard-per-NUMA-node is correct for **SRP only**. 4BP/3BP are core-bound (not DRAM-bound) and can take 4–8 shards per NUMA node for ~2–4× wall-clock speedup. `run_production.sh` currently does not vary shards-per-node by matchup.
-- `COMPRESS_THRESHOLD_GB` is a hardcoded 18.0 (`dataset_driver.rs:279`). On svl8's 503 GB RAM it should be raised to never trigger.
+| Matchup | Shards / NUMA node | Threads / shard (on 36-cpu node) | Total parallel solves on 2 sockets | Rationale |
+|---|---|---|---|---|
+| 4BP | 8 (`SHARDS_PER_NODE_4BP`) | 4–5 | 16 | ~130 MB working set fits in 49.5 MiB L3 → core-bound |
+| 3BP | 4 (`SHARDS_PER_NODE_3BP`) | 9 | 8 | ~1.5 GB / solve, mild bandwidth pressure |
+| SRP | 1 (`SHARDS_PER_NODE_SRP`) | 36 | 2 | 8–17 GB / solve, DRAM-bandwidth bound; oversubscription doesn't help |
+
+Recovery semantics: kill -9 on a shard is safe — atomic `.tmp → rename` writes mean half-written `.jsonl` files cannot exist. Restart with the same tier; file-presence check skips done spots. Each matchup phase is independent — if 4BP fails, the script logs and continues to 3BP.
+
+**Known tuning gaps** (small, to address before/during the full run):
+- `COMPRESS_THRESHOLD_GB` is a hardcoded 18.0 (`dataset_driver.rs:279`). On svl8's 503 GB RAM it should be raised to never trigger. Affects only the handful of SRP rainbow flops that cross the threshold.
 
 ## Repository state
 
