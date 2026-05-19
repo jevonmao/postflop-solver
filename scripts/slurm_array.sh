@@ -38,8 +38,18 @@ cd "$SLURM_SUBMIT_DIR"
 mkdir -p logs
 
 # ---------- environment ----------
-# Pick up cargo/rustup if installed in user dir. Adjust for your cluster.
-[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+# Pick up cargo/rustup from user-installed location. CARGO_HOME/RUSTUP_HOME
+# may be set to a non-$HOME path (e.g. group scratch); export them first so
+# `cargo` finds the toolchain. Fall back to $HOME/.cargo for default installs.
+: "${CARGO_HOME:=/vision/u/jevon/.cargo}"
+: "${RUSTUP_HOME:=/vision/u/jevon/.rustup}"
+export CARGO_HOME RUSTUP_HOME
+if [ -f "$CARGO_HOME/env" ]; then
+    source "$CARGO_HOME/env"
+elif [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+fi
+command -v cargo >/dev/null || { echo "ERROR: cargo not on PATH (CARGO_HOME=$CARGO_HOME)" >&2; exit 1; }
 
 # ---------- slice math ----------
 # Each task takes WINDOW consecutive positions in stratified order.
