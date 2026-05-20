@@ -2,3 +2,5 @@
 /target.bak
 Cargo.lock
 /data/solves/
+/data/training/
+__pycache__/
