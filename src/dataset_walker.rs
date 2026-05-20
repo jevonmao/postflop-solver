@@ -26,6 +26,27 @@ pub struct NodeRecord {
     pub range_advantage: &'static str,
     pub nut_advantage:   &'static str,
     pub range_strategy:  Vec<f32>,
+    /// Present when WalkConfig::emit_combo_data is true.
+    pub combo_data:      Option<ComboData>,
+}
+
+/// Per-combo data for a single decision node. All Vec lengths are determined
+/// by the number of combos in each player's range (may differ between players).
+/// `strategy` rows correspond to the player-to-act's combos.
+#[derive(Clone, Debug)]
+pub struct ComboData {
+    /// Equity of each OOP combo at this node, length = n_oop_combos.
+    pub oop_equity:  Vec<f32>,
+    /// Normalized reach weights of each OOP combo, length = n_oop_combos.
+    pub oop_weights: Vec<f32>,
+    /// Expected value of each OOP combo at this node, length = n_oop_combos.
+    pub oop_ev:      Vec<f32>,
+    pub ip_equity:   Vec<f32>,
+    pub ip_weights:  Vec<f32>,
+    pub ip_ev:       Vec<f32>,
+    /// Action frequencies for the player-to-act, indexed [combo][action].
+    /// Outer length = n_actor_combos, inner length = n_actions.
+    pub strategy:    Vec<Vec<f32>>,
 }
 
 #[derive(Default, Clone, Debug)]
@@ -49,11 +70,14 @@ pub struct WalkConfig {
     pub n_river_samples: usize,
     /// Safety cap on total records emitted per walk.
     pub record_limit: usize,
+    /// When true, emit per-combo equity, weights, EV, and strategy alongside
+    /// the range-aggregate fields. Multiplies record size by ~40–100x.
+    pub emit_combo_data: bool,
 }
 
 impl Default for WalkConfig {
     fn default() -> Self {
-        Self { n_turn_samples: 8, n_river_samples: 6, record_limit: 200_000 }
+        Self { n_turn_samples: 8, n_river_samples: 6, record_limit: 200_000, emit_combo_data: false }
     }
 }
 
@@ -106,7 +130,7 @@ fn walk_rec(
             game.apply_history(action_history);
         }
     } else {
-        out.push(build_record(game, matchup, flop_idx, label_history));
+        out.push(build_record(game, matchup, flop_idx, label_history, cfg.emit_combo_data));
         let actions = game.available_actions();
         for (a_idx, action) in actions.iter().enumerate() {
             game.play(a_idx);
@@ -150,6 +174,7 @@ fn build_record(
     matchup: &str,
     flop_idx: u32,
     label_history: &[String],
+    emit_combo_data: bool,
 ) -> NodeRecord {
     game.cache_normalized_weights();
 
@@ -179,17 +204,39 @@ fn build_record(
     let nut_advantage   = classify_advantage(oop.nut       - ip.nut,       0.03);
 
     let strat = game.strategy();
-    let cur_w = if cur_player == 0 { &w_oop } else { &w_ip };
-    let n = cur_w.len();
+    let n_actor = if cur_player == 0 { w_oop.len() } else { w_ip.len() };
     let mut range_strategy = vec![0.0f32; actions.len()];
     let mut wsum = 0.0f32;
-    for i in 0..n {
-        wsum += cur_w[i];
-        for (a, f) in range_strategy.iter_mut().enumerate() {
-            *f += cur_w[i] * strat[i + a * n];
+    {
+        let cur_w = if cur_player == 0 { &w_oop } else { &w_ip };
+        for i in 0..n_actor {
+            wsum += cur_w[i];
+            for (a, f) in range_strategy.iter_mut().enumerate() {
+                *f += cur_w[i] * strat[i + a * n_actor];
+            }
         }
     }
     if wsum > 0.0 { for f in range_strategy.iter_mut() { *f /= wsum; } }
+
+    let combo_data = if emit_combo_data {
+        let oop_ev = game.expected_values(0);
+        let ip_ev  = game.expected_values(1);
+        let n_a = actions.len();
+        let strategy: Vec<Vec<f32>> = (0..n_actor).map(|i| {
+            (0..n_a).map(|a| strat[i + a * n_actor]).collect()
+        }).collect();
+        Some(ComboData {
+            oop_equity:  eq_oop.clone(),
+            oop_weights: w_oop.clone(),
+            oop_ev,
+            ip_equity:   eq_ip.clone(),
+            ip_weights:  w_ip.clone(),
+            ip_ev,
+            strategy,
+        })
+    } else {
+        None
+    };
 
     NodeRecord {
         matchup: matchup.to_string(),
@@ -201,6 +248,7 @@ fn build_record(
         oop, ip,
         range_advantage, nut_advantage,
         range_strategy,
+        combo_data,
     }
 }
 
@@ -258,6 +306,9 @@ pub fn record_to_json(r: &NodeRecord) -> String {
     write!(s, "\"range_advantage\":\"{}\",",r.range_advantage).unwrap();
     write!(s, "\"nut_advantage\":\"{}\",",  r.nut_advantage).unwrap();
     write!(s, "\"range_strategy\":{}",      json_floats(&r.range_strategy)).unwrap();
+    if let Some(ref cd) = r.combo_data {
+        write!(s, ",\"combo_data\":{}", combo_data_json(cd)).unwrap();
+    }
     s.push('}');
     s
 }
@@ -278,4 +329,20 @@ fn json_strs(v: &[String]) -> String {
 fn json_floats(v: &[f32]) -> String {
     let parts: Vec<String> = v.iter().map(|f| format!("{:.4}", f)).collect();
     format!("[{}]", parts.join(","))
+}
+
+fn combo_data_json(c: &ComboData) -> String {
+    let strat_rows: Vec<String> = c.strategy.iter().map(|row| json_floats(row)).collect();
+    format!(
+        "{{\"oop_equity\":{},\"oop_weights\":{},\"oop_ev\":{},\
+          \"ip_equity\":{},\"ip_weights\":{},\"ip_ev\":{},\
+          \"strategy\":[{}]}}",
+        json_floats(&c.oop_equity),
+        json_floats(&c.oop_weights),
+        json_floats(&c.oop_ev),
+        json_floats(&c.ip_equity),
+        json_floats(&c.ip_weights),
+        json_floats(&c.ip_ev),
+        strat_rows.join(","),
+    )
 }

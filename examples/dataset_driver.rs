@@ -95,6 +95,7 @@ fn main() {
     let target_pct:    f32     = env_f32("TARGET_PCT", 0.02);
     let turn_samples:  usize   = env_usize("TURN_SAMPLES", 8);
     let river_samples: usize   = env_usize("RIVER_SAMPLES", 6);
+    let emit_combo_data: bool  = std::env::var("COMBO_DATA").map(|v| v == "1" || v.to_lowercase() == "true").unwrap_or(false);
     let tier_default = match std::env::var("TIER").ok().map(|s| s.to_lowercase()).as_deref() {
         Some("smoke")  => TIER_SMOKE,
         Some("medium") => TIER_MEDIUM,
@@ -150,6 +151,7 @@ fn main() {
     println!("Iter cap:       {max_iter}");
     println!("Target:         {:.1}% of pot", 100.0 * target_pct);
     println!("Chance samples: {} turn × {} river per flop", turn_samples, river_samples);
+    println!("Combo data:     {}", if emit_combo_data { "enabled (COMBO_DATA=1)" } else { "disabled" });
     println!("Output:         {}\n", out_dir.display());
 
     // Build the OOP × IP range pair per matchup (clone once, reuse per flop).
@@ -171,6 +173,7 @@ fn main() {
         n_turn_samples: turn_samples,
         n_river_samples: river_samples,
         record_limit: 1_000_000,
+        emit_combo_data,
     };
 
     // ---------- driver loop ----------
@@ -195,8 +198,15 @@ fn main() {
             let progress_idx = mi * flops_window.len() + fi + 1;
 
             if out_path.exists() && meta_path.exists() {
-                skipped += 1;
-                continue;
+                let skip = if emit_combo_data {
+                    // Re-solve if this spot was written without combo data.
+                    fs::read_to_string(&meta_path)
+                        .map(|s| s.contains("combo_data=true"))
+                        .unwrap_or(false)
+                } else {
+                    true
+                };
+                if skip { skipped += 1; continue; }
             }
 
             let result = solve_and_write(
@@ -205,6 +215,7 @@ fn main() {
                 &flop_b, &turn_b, &river_b,
                 max_iter, target_pct, walk_cfg,
                 &out_path, &meta_path,
+                emit_combo_data,
             );
 
             let elapsed = started.elapsed().as_secs_f64();
@@ -250,6 +261,7 @@ fn solve_and_write(
     flop_b: &BetSizeOptions, turn_b: &BetSizeOptions, river_b: &BetSizeOptions,
     max_iter: u32, target_pct: f32, walk_cfg: WalkConfig,
     out_path: &Path, meta_path: &Path,
+    emit_combo_data: bool,
 ) -> Result<SolveStats, String> {
     let card_config = CardConfig {
         range: [oop_range.clone(), ip_range.clone()],
@@ -303,10 +315,11 @@ fn solve_and_write(
 
     // Meta file (small text — solve stats).
     let meta = format!(
-        "matchup={}\nflop_idx={}\nmemory_gb={:.2}\ncompressed={}\nbuild_s={:.2}\nsolve_s={:.2}\nwalk_s={:.2}\nexploitability_pct_pot={:.4}\nn_records={}\nmax_iter={}\ntarget_pct={:.4}\nturn_samples={}\nriver_samples={}\n",
+        "matchup={}\nflop_idx={}\nmemory_gb={:.2}\ncompressed={}\nbuild_s={:.2}\nsolve_s={:.2}\nwalk_s={:.2}\nexploitability_pct_pot={:.4}\nn_records={}\nmax_iter={}\ntarget_pct={:.4}\nturn_samples={}\nriver_samples={}\ncombo_data={}\n",
         matchup.label, flop_idx, mem_gb, use_compress, build_s, solve_s, walk_s,
         100.0 * expl / pot, records.len(), max_iter, target_pct,
         walk_cfg.n_turn_samples, walk_cfg.n_river_samples,
+        emit_combo_data,
     );
     fs::write(meta_path, meta).map_err(|e| format!("write meta: {e}"))?;
 
