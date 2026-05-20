@@ -30,23 +30,34 @@ pub struct NodeRecord {
     pub combo_data:      Option<ComboData>,
 }
 
-/// Per-combo data for a single decision node. All Vec lengths are determined
-/// by the number of combos in each player's range (may differ between players).
-/// `strategy` rows correspond to the player-to-act's combos.
+/// Per-combo data for a single decision node, **sparse**: only combos with
+/// nonzero reach weight are recorded. Indices reference the file-level header's
+/// `combos_oop` / `combos_ip` arrays.
+///
+/// `strategy` is aligned with the actor's sparse-idx list (the one matching
+/// the player-to-act). Each row is either:
+///   - an `i32` (>=0): "pure" strategy → action index
+///   - a `Vec<f32>`: full distribution over actions (used when no single
+///     action gets ≥99.5% of the weight)
 #[derive(Clone, Debug)]
 pub struct ComboData {
-    /// Equity of each OOP combo at this node, length = n_oop_combos.
-    pub oop_equity:  Vec<f32>,
-    /// Normalized reach weights of each OOP combo, length = n_oop_combos.
-    pub oop_weights: Vec<f32>,
-    /// Expected value of each OOP combo at this node, length = n_oop_combos.
-    pub oop_ev:      Vec<f32>,
-    pub ip_equity:   Vec<f32>,
-    pub ip_weights:  Vec<f32>,
-    pub ip_ev:       Vec<f32>,
-    /// Action frequencies for the player-to-act, indexed [combo][action].
-    /// Outer length = n_actor_combos, inner length = n_actions.
-    pub strategy:    Vec<Vec<f32>>,
+    pub oop: SparsePerCombo,
+    pub ip:  SparsePerCombo,
+    pub strategy: Vec<StrategyEntry>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct SparsePerCombo {
+    pub idx:    Vec<u32>,  // index into header.combos_*
+    pub eq:     Vec<f32>,
+    pub weight: Vec<f32>,
+    pub ev:     Vec<i32>,  // EV in chips, rounded to nearest integer
+}
+
+#[derive(Clone, Debug)]
+pub enum StrategyEntry {
+    Pure(u8),         // action index when one action dominates
+    Mixed(Vec<f32>),  // full distribution otherwise
 }
 
 #[derive(Default, Clone, Debug)]
@@ -222,18 +233,31 @@ fn build_record(
         let oop_ev = game.expected_values(0);
         let ip_ev  = game.expected_values(1);
         let n_a = actions.len();
-        let strategy: Vec<Vec<f32>> = (0..n_actor).map(|i| {
-            (0..n_a).map(|a| strat[i + a * n_actor]).collect()
+        const W_EPS: f32 = 1e-6;
+
+        let oop = sparsify(&eq_oop, &w_oop, &oop_ev, W_EPS);
+        let ip  = sparsify(&eq_ip,  &w_ip,  &ip_ev,  W_EPS);
+
+        // Strategy aligned with actor's sparse idx order.
+        let actor_w   = if cur_player == 0 { &w_oop }  else { &w_ip  };
+        let actor_idx = if cur_player == 0 { &oop.idx } else { &ip.idx };
+        let strategy: Vec<StrategyEntry> = actor_idx.iter().map(|&i| {
+            let i = i as usize;
+            let _ = actor_w[i]; // bounds sanity
+            // Read action probs for this combo.
+            let probs: Vec<f32> = (0..n_a).map(|a| strat[i + a * n_actor]).collect();
+            // Pure if one action ≥ 99.5%.
+            let (best_a, best_p) = probs.iter().enumerate()
+                .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
+                .map(|(i, &p)| (i, p)).unwrap_or((0, 0.0));
+            if best_p >= 0.995 {
+                StrategyEntry::Pure(best_a as u8)
+            } else {
+                StrategyEntry::Mixed(probs)
+            }
         }).collect();
-        Some(ComboData {
-            oop_equity:  eq_oop.clone(),
-            oop_weights: w_oop.clone(),
-            oop_ev,
-            ip_equity:   eq_ip.clone(),
-            ip_weights:  w_ip.clone(),
-            ip_ev,
-            strategy,
-        })
+
+        Some(ComboData { oop, ip, strategy })
     } else {
         None
     };
@@ -285,6 +309,65 @@ fn classify_advantage(diff: f32, threshold: f32) -> &'static str {
     else { "EVEN" }
 }
 
+fn sparsify(eq: &[f32], w: &[f32], ev: &[f32], w_eps: f32) -> SparsePerCombo {
+    let cap = w.iter().filter(|&&x| x > w_eps).count();
+    let mut out = SparsePerCombo {
+        idx:    Vec::with_capacity(cap),
+        eq:     Vec::with_capacity(cap),
+        weight: Vec::with_capacity(cap),
+        ev:     Vec::with_capacity(cap),
+    };
+    for (i, &wi) in w.iter().enumerate() {
+        if wi > w_eps {
+            out.idx.push(i as u32);
+            out.eq.push(eq[i]);
+            out.weight.push(wi);
+            out.ev.push(ev[i].round() as i32);
+        }
+    }
+    out
+}
+
+/// Format a `(Card, Card)` pair as a 4-char string like "AcAd".
+/// Uses the same single-char rank/suit alphabet as `card_to_string`.
+pub fn combo_to_string(c1: u8, c2: u8) -> String {
+    let mut s = String::with_capacity(4);
+    s.push_str(&card_to_string(c1).unwrap_or_else(|_| "??".into()));
+    s.push_str(&card_to_string(c2).unwrap_or_else(|_| "??".into()));
+    s
+}
+
+/// One file header line emitted before any node records when combo data
+/// is enabled. Embeds enough state for a pure-Python decoder to reconstruct
+/// the dense per-combo arrays without re-running the Rust solver.
+pub fn header_json(
+    matchup: &str,
+    flop_idx: u32,
+    flop: &[u8; 3],
+    starting_pot: i32,
+    effective_stack: i32,
+    combos_oop: &[(u8, u8)],
+    combos_ip:  &[(u8, u8)],
+) -> String {
+    let flop_strs: Vec<String> = flop.iter()
+        .map(|c| card_to_string(*c).unwrap_or_else(|_| "??".into())).collect();
+    let oop_strs:  Vec<String> = combos_oop.iter().map(|&(a,b)| combo_to_string(a,b)).collect();
+    let ip_strs:   Vec<String> = combos_ip.iter().map(|&(a,b)| combo_to_string(a,b)).collect();
+    let mut s = String::with_capacity(64 + 5 * (oop_strs.len() + ip_strs.len()));
+    s.push('{');
+    write!(s, "\"type\":\"header\",").unwrap();
+    write!(s, "\"schema\":\"combo-v2\",").unwrap();
+    write!(s, "\"matchup\":\"{}\",", matchup).unwrap();
+    write!(s, "\"flop_idx\":{},", flop_idx).unwrap();
+    write!(s, "\"flop\":{},", json_strs(&flop_strs)).unwrap();
+    write!(s, "\"starting_pot\":{},", starting_pot).unwrap();
+    write!(s, "\"effective_stack\":{},", effective_stack).unwrap();
+    write!(s, "\"combos_oop\":{},", json_strs(&oop_strs)).unwrap();
+    write!(s, "\"combos_ip\":{}",   json_strs(&ip_strs)).unwrap();
+    s.push('}');
+    s
+}
+
 // ==================================================================
 // JSON serialization (hand-written to avoid serde dep)
 // ==================================================================
@@ -332,17 +415,37 @@ fn json_floats(v: &[f32]) -> String {
 }
 
 fn combo_data_json(c: &ComboData) -> String {
-    let strat_rows: Vec<String> = c.strategy.iter().map(|row| json_floats(row)).collect();
+    let strat_rows: Vec<String> = c.strategy.iter().map(|e| match e {
+        StrategyEntry::Pure(a)   => format!("{}", a),
+        StrategyEntry::Mixed(ps) => json_floats3(ps),
+    }).collect();
     format!(
-        "{{\"oop_equity\":{},\"oop_weights\":{},\"oop_ev\":{},\
-          \"ip_equity\":{},\"ip_weights\":{},\"ip_ev\":{},\
-          \"strategy\":[{}]}}",
-        json_floats(&c.oop_equity),
-        json_floats(&c.oop_weights),
-        json_floats(&c.oop_ev),
-        json_floats(&c.ip_equity),
-        json_floats(&c.ip_weights),
-        json_floats(&c.ip_ev),
+        "{{\"oop\":{},\"ip\":{},\"strategy\":[{}]}}",
+        sparse_per_combo_json(&c.oop),
+        sparse_per_combo_json(&c.ip),
         strat_rows.join(","),
     )
+}
+
+fn sparse_per_combo_json(s: &SparsePerCombo) -> String {
+    format!(
+        "{{\"idx\":{},\"eq\":{},\"w\":{},\"ev\":{}}}",
+        json_u32s(&s.idx),
+        json_floats3(&s.eq),
+        json_floats3(&s.weight),
+        json_ints(&s.ev),
+    )
+}
+
+fn json_floats3(v: &[f32]) -> String {
+    let parts: Vec<String> = v.iter().map(|f| format!("{:.3}", f)).collect();
+    format!("[{}]", parts.join(","))
+}
+fn json_u32s(v: &[u32]) -> String {
+    let parts: Vec<String> = v.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(","))
+}
+fn json_ints(v: &[i32]) -> String {
+    let parts: Vec<String> = v.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", parts.join(","))
 }

@@ -258,6 +258,52 @@ TARGET_PCT=0.02        exploitability target (default: 2% of pot)
 TURN_SAMPLES=8         chance-sampling density for turn
 RIVER_SAMPLES=6        chance-sampling density for river
 OUT_DIR=path           override data/solves
+COMBO_DATA=1           emit per-combo equity/weight/EV/strategy (see below)
+```
+
+### Combo-data output (`COMBO_DATA=1`, schema `combo-v2`)
+
+When `COMBO_DATA=1` the driver writes `<idx>_<flop>.jsonl.zst` (zstd-compressed)
+instead of `.jsonl`, and prefixes the file with a one-line header that embeds
+everything a downstream consumer needs to decode per-combo arrays without a
+Rust runtime. Approx ~20× smaller than the original dense format on
+root-of-tree nodes, larger savings on deep nodes.
+
+Build requires `--features zstd` (`run_production.sh` toggles this automatically
+when `COMBO_DATA=1`).
+
+Header (line 1):
+
+```json
+{"type":"header","schema":"combo-v2","matchup":"3BP","flop_idx":1,
+ "flop":["2c","2d","2h"],"starting_pot":2000,"effective_stack":19000,
+ "combos_oop":["AcAd","AcAh",...],
+ "combos_ip" :["AcAd","AcAh",...]}
+```
+
+Node records (lines 2..N): unchanged range-aggregate fields plus
+
+```json
+"combo_data": {
+  "oop": {"idx":[0,2,5,...], "eq":[0.510,...], "w":[0.012,...], "ev":[1850,...]},
+  "ip" : {"idx":[1,4,...],   "eq":[...],       "w":[...],       "ev":[...]},
+  "strategy": [0, [0.5,0.5,0], 2, ...]
+}
+```
+
+- `oop`/`ip` are **sparse** — only combos with reach weight > 1e-6 appear.
+  `idx` is the position in the header's `combos_oop`/`combos_ip`.
+- `strategy` is aligned with the **player-to-act's** sparse idx list. Each entry is
+  either an integer action index (pure, ≥99.5% of weight on one action) or a
+  full distribution as floats.
+- Quantization: equity & weight to 3 decimals, EV rounded to integer chips.
+- The driver re-solves any spot whose `.meta` lacks `schema=combo-v2`, so
+  switching `COMBO_DATA=1` on does a full re-run.
+
+Reference Python decoder (no Rust, requires `pip install zstandard`):
+
+```sh
+python scripts/decode_combo_data.py path/to/0001_2c2d2h.jsonl.zst --densify --limit 1
 ```
 
 ### Generate input files (one-time setup after clone)

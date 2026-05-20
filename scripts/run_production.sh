@@ -63,8 +63,14 @@ if ! command -v cargo >/dev/null; then
 fi
 
 # ---------- build (with native CPU flags from .cargo/config.toml) ----------
-echo "==> Building dataset_driver in release mode (target-cpu=native)..."
-cargo build --release --example dataset_driver
+# Enable `zstd` feature whenever COMBO_DATA=1 so the driver can write
+# .jsonl.zst output. Otherwise the standard (range-only) build is fine.
+CARGO_FEATURES=""
+case "${COMBO_DATA:-0}" in
+    1|true|TRUE) CARGO_FEATURES="--features zstd" ;;
+esac
+echo "==> Building dataset_driver in release mode (target-cpu=native, features='$CARGO_FEATURES')..."
+cargo build --release $CARGO_FEATURES --example dataset_driver
 
 # Sanity-check the binary picked up AVX-512 on this machine.
 BIN="target/release/examples/dataset_driver"
