@@ -21,8 +21,9 @@
 
 # ---------- SLURM resource request ----------
 #SBATCH --job-name=postflop-dataset
-#SBATCH --account=default
+#SBATCH --account=vision
 #SBATCH --partition=svl
+#SBATCH --qos=normal
 #SBATCH --array=0-19                  # 20 slices × ~88 flops/slice (tune to fit walltime)
 #SBATCH --nodes=1                     # one node per array task
 #SBATCH --ntasks=1
