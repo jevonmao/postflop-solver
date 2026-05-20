@@ -4,3 +4,4 @@ Cargo.lock
 /data/solves/
 /data/training/
 __pycache__/
+*.egg-info/
