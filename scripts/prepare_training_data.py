@@ -8,7 +8,23 @@ Each solver record becomes one ShareGPT conversation:
 Usage:
   python scripts/prepare_training_data.py [--solves-dir data/solves] \
       [--out-dir data/training] [--matchups 4BP,3BP,SRP] \
-      [--seed 42] [--split 0.8/0.1/0.1] [--min-actions 2]
+      [--seed 42] [--split 0.8/0.1/0.1] [--min-actions 2] \
+      [--max-raise-streak 3] [--balance-matchups]
+
+Filtering options:
+  --max-raise-streak N  Drop records where any street has N or more consecutive
+                        raises/bets without a call/check in between. Useful for
+                        removing rare deep-reraise lines (e.g. river 4-bets) that
+                        add noise without meaningful LLM signal. Default: no limit.
+                        Recommended: 3 (drops ~1.75% of records, streak=4+).
+
+  --balance-matchups    Subsample overrepresented matchups so each contributes
+                        roughly equal total records to the training data. 4BP
+                        generates ~7x more records per flop than SRP; without
+                        balancing the model sees mostly short-stack jam/fold spots.
+                        Downsamples each matchup to match the smallest matchup's
+                        total record count. Sampling is done per-flop to preserve
+                        flop distribution within each matchup.
 """
 
 import argparse
@@ -446,6 +462,37 @@ def build_prompt(record: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Raise-streak filter
+# ---------------------------------------------------------------------------
+
+def _classify_action(a: str) -> str:
+    if a in ("check", "call", "fold"):
+        return a
+    if a.startswith("bet_"):
+        return "bet"
+    if a.startswith("raise_") or a.startswith("allin"):
+        return "raise"
+    return "other"
+
+
+def max_raise_streak(history: list[str]) -> int:
+    """Max consecutive raises/bets within any single street."""
+    best = 0
+    streak = 0
+    for h in history:
+        if h.startswith("deal_"):
+            streak = 0  # new street resets
+            continue
+        kind = _classify_action(h)
+        if kind in ("bet", "raise"):
+            streak += 1
+            best = max(best, streak)
+        elif kind in ("check", "call", "fold"):
+            streak = 0
+    return best
+
+
+# ---------------------------------------------------------------------------
 # Record validation
 # ---------------------------------------------------------------------------
 
@@ -535,6 +582,14 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--split", default="0.8/0.1/0.1")
     parser.add_argument("--min-actions", type=int, default=2)
+    parser.add_argument(
+        "--max-raise-streak", type=int, default=None, metavar="N",
+        help="Drop records with >N consecutive raises in any street (e.g. 3 drops streak=4+).",
+    )
+    parser.add_argument(
+        "--balance-matchups", action="store_true",
+        help="Subsample each matchup down to the smallest matchup's total record count.",
+    )
     args = parser.parse_args()
 
     matchups = [m.strip() for m in args.matchups.split(",")]
@@ -547,6 +602,23 @@ def main():
 
     print(f"Loading records from {args.solves_dir} ...")
     all_data = load_records(args.solves_dir, matchups)
+
+    # --balance-matchups: per-flop subsample so each matchup has equal total records
+    if args.balance_matchups:
+        rng = random.Random(args.seed)
+        totals = {m: sum(len(v) for v in fm.values()) for m, fm in all_data.items()}
+        target = min(totals.values())
+        print(f"Balancing matchups → target {target:,} records each (was: {totals})")
+        for matchup, flop_map in all_data.items():
+            current_total = totals[matchup]
+            if current_total <= target:
+                continue
+            # Subsample each flop proportionally to keep flop coverage uniform
+            keep_ratio = target / current_total
+            for flop_idx in list(flop_map.keys()):
+                recs = flop_map[flop_idx]
+                k = max(1, round(len(recs) * keep_ratio))
+                flop_map[flop_idx] = rng.sample(recs, min(k, len(recs)))
 
     # Aggregate split assignments across matchups (keyed by (matchup, flop_idx))
     split_map: dict[tuple[str, int], str] = {}
@@ -578,6 +650,7 @@ def main():
         for split in ("train", "val", "test")
     }
     global_filtered = 0
+    global_streak_filtered = 0
 
     print("Converting records ...")
     for matchup, flop_map in all_data.items():
@@ -588,6 +661,11 @@ def main():
                 if not is_valid(rec, args.min_actions):
                     global_filtered += 1
                     continue
+                if args.max_raise_streak is not None:
+                    streak = max_raise_streak(rec.get("history", []))
+                    if streak > args.max_raise_streak:
+                        global_streak_filtered += 1
+                        continue
                 prompt = build_prompt(rec)
                 completion = generate_reasoning(rec)
                 example = {
@@ -620,6 +698,7 @@ def main():
         }
         total_records += s["total"]
     stats_out["filtered_records"] = global_filtered
+    stats_out["streak_filtered_records"] = global_streak_filtered
     stats_out["total_records"] = total_records
 
     with open(args.out_dir / "stats.json", "w") as f:
@@ -628,6 +707,8 @@ def main():
     # Print summary
     print(f"\nDone. Output in {args.out_dir}/")
     print(f"  Filtered (invalid/single-action): {global_filtered:,}")
+    if args.max_raise_streak is not None:
+        print(f"  Filtered (raise streak >{args.max_raise_streak}):   {global_streak_filtered:,}")
     for split in ("train", "val", "test"):
         s = stats_out[split]
         print(f"  {split:5s}: {s['records']:>8,} records | {s['flops']} flops | ~{s['approx_tokens']//1000}k tokens")
