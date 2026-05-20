@@ -84,6 +84,58 @@ $ cargo run --release --example basic
 [rayon]: https://github.com/rayon-rs/rayon
 [zstd]: https://github.com/gyscos/zstd-rs
 
+## Dataset pipeline progress log
+
+### 2026-05-20 — combo-v2 format + full cluster run kicked off
+
+Rebuilt the per-combo data emission to be ~20–100× smaller and decodable
+without a Rust runtime. Then validated the format end-to-end and submitted
+the full HU 200 BB dataset run on Stanford SC.
+
+**Format rewrite (`feat(dataset): combo-v2 …`):**
+- Sparse per-node arrays — combos with reach weight < 1e-6 are omitted
+  (parallel `idx` / `eq` / `w` / `ev`).
+- Quantization — equity & weights to 3 decimals, EV rounded to integer chips.
+- Strategy compression — per-combo distributions stored as a single `int`
+  (action index) when one action holds ≥99.5% of the weight; full float array
+  otherwise.
+- File-level header line embeds the canonical OOP/IP combo enumeration as
+  `"AcAd"`-style strings, so downstream consumers map `idx → hand` without
+  rerunning the solver.
+- Output written as `.jsonl.zst` (level 6, multithreaded). Driver requires
+  `--features zstd`; `run_production.sh` toggles this automatically when
+  `COMBO_DATA=1`.
+- Reference Python decoder at `scripts/decode_combo_data.py` (pure Python,
+  needs only the `zstandard` package).
+- Skip-check keys on `schema=combo-v2` in the meta file, so any pre-existing
+  v1 files are re-solved cleanly.
+
+**Local validation:** 4BP `AcAdAh` root spot — 4128 records, 6.5 MB compressed
+(was ~120 MB dense), densifier round-trips correctly, ~50% of per-combo
+strategy rows compressed to a single `int`.
+
+**SLURM submission fixes** (Stanford SC `svl` partition):
+- `--account=vision` (was `default`, not on `AllowAccounts`).
+- `--qos=normal` (the partition's default `svl` QoS rejects 72-CPU / 128G
+  requests with `PartitionConfig`).
+
+**Cluster smoke test:** 100 flops × 3 matchups → all wrote valid `.jsonl.zst`
+files, every `.meta` claims `schema=combo-v2`, Python decoder densifies them
+cleanly.
+
+**Full run kicked off:** `sbatch --array=0-19%10 … TIER=full,COMBO_DATA=1`,
+auto-chained after smoke via `--dependency=afterok:`. First 6 array tasks
+running across svl5/12/15/16/17/18; ~6–8 h projected wallclock. Output:
+`data/solves_combo/`.
+
+**Known follow-ups** before/after the run completes:
+- `verify_dataset` still parses v1 (dense) only — needs updating for `combo-v2`.
+- `COMPRESS_THRESHOLD_GB` in `dataset_driver.rs:279` is still a hardcoded
+  18.0; on svl's 250–510 GB nodes it should be raised so compression never
+  triggers.
+- Decoder script only takes a single file at a time; trivial to extend for
+  batch audits.
+
 ## License
 
 Copyright (C) 2022 Wataru Inariba
