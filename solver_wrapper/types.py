@@ -1,5 +1,23 @@
 from __future__ import annotations
 
+from dataclasses import dataclass as _dataclass
+
+@_dataclass
+class SolveResult:
+    matchup: str
+    flop: list[str]
+    solve_ms: int
+    exploitability_pct: float
+
+    def __str__(self) -> str:
+        flop_str = "".join(self.flop)
+        return (
+            f"Solved {self.matchup} {flop_str} in {self.solve_ms/1000:.2f}s "
+            f"(exploitability: {self.exploitability_pct:.2f}%)"
+        )
+
+
+
 import random as _random
 from dataclasses import dataclass, field
 from typing import Optional
