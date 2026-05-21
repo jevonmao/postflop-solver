@@ -21,6 +21,7 @@ All runnable as `cargo run --release --example <name>`. Some take env vars.
 | `btn_vs_bb_100bb` | Realistic 100 BB BTN-vs-BB SRP solve with full equity/EV/strategy reporting at root. Useful tutorial spot. |
 | `throughput_bench` | Solves representative river/turn/flop spots and prints projected throughput. |
 | `hu_200bb_bench` | The HU 200 BB benchmark across SRP / 3BP / 4BP for two flops each. Memory + time per spot. |
+| `limp_pot_bench` | Single-flop limped-pot (SPR ~99) benchmark. `FLOP=<board>` env var. Results in `LIMP_POT_BENCHMARK.md`: ~46 GB / ~253 s — heaviest HU spot. |
 | `srp_speedup_bench` | A/B/C/D matrix comparing bet-tree complexity × exploitability target on the heaviest SRP spot. Source of the "rich-flop / lean-elsewhere / 2% target" recommendation. |
 | `range_advantage_demo` | At-root range/nut/equity-bucket extraction. Shows that derived features track solver behavior on contrasting boards (Kh7d2c IP-favored vs Th9d8h roughly even). |
 | `tree_walker_demo` | Full DFS over a solved game tree emitting one JSON record per decision node with strategy label + range-advantage features. Test it on small spots first via `SPOT=4bp` (~1.3s) before `SPOT=3bp` (~17s). |
