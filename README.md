@@ -86,6 +86,52 @@ $ cargo run --release --example basic
 
 ## Dataset pipeline progress log
 
+### 2026-05-20 — chance-sampling analysis + full-walk size estimate
+
+Clarified a subtle pipeline property and estimated the cost of removing the
+turn/river subsampling.
+
+**Solve is exhaustive; the walk is what subsamples.** `solve()` computes the
+equilibrium over the *complete* game tree — all 49 turns × 48 rivers, every
+spot. No solver compute is ever saved or lost by the sample settings. The
+subsampling lives only in `src/dataset_walker.rs` (`n_turn_samples=8`,
+`n_river_samples=6`): the record-emitting DFS visits 8/49 turns and 6/48
+rivers. The solved strategies at unvisited nodes exist in memory but are never
+written to JSONL, and the driver does not serialize the solved tree — so
+recovering them requires a re-solve.
+
+**Current dataset — per-spot record counts by street** (`combo-v2`, 8/6 sampling):
+
+| Matchup | Flop | Turn | River | Total/spot | On disk |
+|---|---|---|---|---|---|
+| SRP | 24 | 1,152 | 27,648 | 28,824 | 106 GB / 1737 spots |
+| 3BP | 20 | 736 | 11,520 | 12,276 | 59 GB / 1755 |
+| 4BP | 16 | 368 | 3,744 | 4,128 | 14 GB / 1755 |
+
+Total **178 GB**. Records are ~96% river.
+
+**Full-walk multipliers** — flop unchanged, turn ×49/8 = 6.1×, river
+×(49/8 × 48/6) = 49×. River dominance pushes every matchup near the 49×
+asymptote:
+
+| Matchup | Multiplier | Full records/spot | Projected size |
+|---|---|---|---|
+| SRP | 47.3× | ~1,361,800 | ~5.0 TB |
+| 3BP | 46.4× | ~569,000 | ~2.7 TB |
+| 4BP | 45.0× | ~185,700 | ~0.6 TB |
+
+**Full-walk dataset ≈ 8–8.5 TB** (per-record size is ~constant — the extra
+records are river records, which already dominate the current average).
+
+**Caveats before attempting a full walk:**
+- `record_limit = 200,000` (`dataset_walker.rs:91`) silently truncates — a full
+  SRP spot wants ~1.36M records. Truncation is DFS-order-biased (early subtrees
+  fully expanded, later branches never reached), so it yields a lopsided
+  dataset, not a uniformly smaller one. Must be raised for a true full walk.
+- Isomorphism-aware chance dedup is the better lever: a rainbow flop has ~3
+  distinct turn-suit classes, not 49. Deduping captures all distinct strategic
+  content at an estimated ~15–25× (≈3–4 TB) instead of 47×.
+
 ### 2026-05-20 — combo-v2 format + full cluster run kicked off
 
 Rebuilt the per-combo data emission to be ~20–100× smaller and decodable
@@ -135,6 +181,68 @@ running across svl5/12/15/16/17/18; ~6–8 h projected wallclock. Output:
   triggers.
 - Decoder script only takes a single file at a time; trivial to extend for
   batch audits.
+
+### 2026-05-20 — configurable bet sizing + scaling benchmarks
+
+Full dataset run completed on cluster. Added env-var control over bet sizes per
+street so future runs can vary sizing without recompiling.
+
+**New env vars (`examples/dataset_driver.rs`):**
+
+| Var | Default | Accepts |
+|---|---|---|
+| `FLOP_BETS` | `33%,75%` | any `BetSizeOptions` bet string |
+| `FLOP_RAISES` | `3x` | any raise string |
+| `TURN_BETS` | `75%` | — |
+| `TURN_RAISES` | `3x` | — |
+| `RIVER_BETS` | `75%` | — |
+| `RIVER_RAISES` | `3x` | — |
+
+Active sizings are printed in the startup header so cluster logs are
+self-documenting.
+
+**Scaling benchmarks (SRP, 2 flops, Ryzen 5950X):**
+
+Adding one extra bet size per street on SRP (most expensive matchup); RAM ratio
+is the proxy for uncompressed solve-time on svl8 (memory-bandwidth bound):
+
+| Config | Solve avg | RAM | Records/spot | Cost vs baseline |
+|---|---|---|---|---|
+| Baseline `33%,75%`/`75%`/`75%` | 153 s | 15.7 GB | 28,824 | 1.00× |
+| +125% flop | — | 21.1 GB | 38,880 | **+34%** |
+| +125% river | — | 25.1 GB | 42,648 | **+60%** |
+| +50% turn | — | 29.8 GB | 54,728 | **+90%** |
+
+Note: all three tests crossed the 18 GB `COMPRESS_THRESHOLD_GB` threshold on
+the local machine, so raw solve times are misleadingly fast there. On svl8
+(`COMPRESS_THRESHOLD_GB=999`), expect cost ≈ RAM ratio.
+
+Turn size is most expensive because turn nodes are visited once per sampled
+turn card (chance branching multiplier). River is intermediate. Flop is cheapest.
+
+**Full-dataset time projection (svl8, 2-NUMA parallel):**
+
+| Config | Est. wall-clock |
+|---|---|
+| Baseline | ~42 h |
+| +125% flop | ~56 h |
+| +125% river | ~67 h |
+| +50% turn | ~80 h |
+
+**Full chance-node walk (no sampling):**
+
+`TURN_SAMPLES` / `RIVER_SAMPLES` control the walker, not the solver — the solver
+always computes all chance nodes. Walking all ~45 turn × ~44 river cards = ~41×
+more records per spot. Impact:
+
+| Matchup | Current total | Full-card walk total |
+|---|---|---|
+| SRP | ~142 s/spot | ~230 s/spot (walk becomes 90 s) |
+| 3BP | ~12 s/spot | ~15 s/spot |
+| 4BP | ~1.6 s/spot | ~5.6 s/spot (walk now dominates solve) |
+
+Full-card dataset would be ~6.2B records total vs ~151M current. At 200 bytes/
+record compressed ≈ 1.2 TB. svl8 full run: ~60 h (vs ~42 h baseline).
 
 ## License
 

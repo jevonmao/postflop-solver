@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import type { NodeRecord, RangeStats, SpotMeta } from '@/lib/types';
+import { useEffect, useMemo, useState } from 'react';
+import type { NodeRecord, RangeStats, SpotMeta, NodeCombo } from '@/lib/types';
 import { buildTrie, isChanceNode, navigate, type TrieNode } from '@/lib/tree';
 import { Board, Card } from './Card';
+import { HandGrid } from './HandGrid';
 
 interface Props {
   matchup: string;
@@ -30,6 +31,8 @@ export function SpotViewer({ matchup, stem, records, meta }: Props) {
         {current && current.record && (
           <DecisionView
             node={current}
+            matchup={matchup}
+            stem={stem}
             onDescend={(k) => setHistory([...history, k])}
           />
         )}
@@ -103,8 +106,10 @@ function HistoryBreadcrumb({ history, onJump }: { history: string[]; onJump: (i:
 
 function DecisionView({
   node,
+  matchup,
+  stem,
   onDescend,
-}: { node: TrieNode; onDescend: (key: string) => void }) {
+}: { node: TrieNode; matchup: string; stem: string; onDescend: (key: string) => void }) {
   const r = node.record!;
   return (
     <>
@@ -133,7 +138,85 @@ function DecisionView({
       <AdvantageBadges record={r} />
 
       <StrategyPanel record={r} onDescend={onDescend} node={node} />
+
+      <ComboGrids matchup={matchup} stem={stem} record={r} />
     </>
+  );
+}
+
+function ComboGrids({
+  matchup, stem, record,
+}: { matchup: string; stem: string; record: NodeRecord }) {
+  const [state, setState] = useState<
+    { kind: 'loading' } | { kind: 'none' } | { kind: 'error'; msg: string } | { kind: 'ok'; data: NodeCombo }
+  >({ kind: 'loading' });
+
+  const histKey = record.history.join(' ');
+
+  useEffect(() => {
+    let cancelled = false;
+    setState({ kind: 'loading' });
+    const h = encodeURIComponent(JSON.stringify(record.history));
+    fetch(`/api/combo/${matchup}/${stem}?h=${h}`)
+      .then(async (res) => {
+        if (cancelled) return;
+        if (res.status === 404) { setState({ kind: 'none' }); return; }
+        if (!res.ok) { setState({ kind: 'error', msg: `HTTP ${res.status}` }); return; }
+        const data = (await res.json()) as NodeCombo;
+        if (!cancelled) setState({ kind: 'ok', data });
+      })
+      .catch((e) => { if (!cancelled) setState({ kind: 'error', msg: String(e) }); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchup, stem, histKey]);
+
+  if (state.kind === 'loading') {
+    return (
+      <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 text-xs text-neutral-500">
+        Loading per-combo data…
+      </div>
+    );
+  }
+  if (state.kind === 'none') {
+    return (
+      <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 text-xs text-neutral-600 italic">
+        No per-combo data for this node — re-solve with <code className="text-neutral-400">COMBO_DATA=1</code> to populate 13×13 grids.
+      </div>
+    );
+  }
+  if (state.kind === 'error') {
+    return (
+      <div className="rounded-lg border border-red-900 bg-neutral-900 p-4 text-xs text-red-400">
+        Failed to load combo data: {state.msg}
+      </div>
+    );
+  }
+
+  const { data } = state;
+  const cd = data.combo_data;
+  return (
+    <div>
+      <h3 className="text-sm font-semibold mb-2">
+        Per-combo grids
+        <span className="text-neutral-500 font-normal"> — equity · range · EV · strategy</span>
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <HandGrid
+          side="OOP"
+          labels={data.combos_oop}
+          combo={cd.oop}
+          actions={data.actions}
+          strategy={data.to_act === 'O' ? cd.strategy : undefined}
+        />
+        <HandGrid
+          side="IP"
+          labels={data.combos_ip}
+          combo={cd.ip}
+          actions={data.actions}
+          strategy={data.to_act === 'I' ? cd.strategy : undefined}
+        />
+      </div>
+    </div>
   );
 }
 

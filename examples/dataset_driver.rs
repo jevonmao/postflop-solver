@@ -114,6 +114,13 @@ fn main() {
     let out_dir: PathBuf       = std::env::var("OUT_DIR").map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("data/solves"));
 
+    let flop_bets_s    = std::env::var("FLOP_BETS")   .unwrap_or_else(|_| "33%,75%".into());
+    let flop_raises_s  = std::env::var("FLOP_RAISES")  .unwrap_or_else(|_| "3x".into());
+    let turn_bets_s    = std::env::var("TURN_BETS")   .unwrap_or_else(|_| "75%".into());
+    let turn_raises_s  = std::env::var("TURN_RAISES")  .unwrap_or_else(|_| "3x".into());
+    let river_bets_s   = std::env::var("RIVER_BETS")  .unwrap_or_else(|_| "75%".into());
+    let river_raises_s = std::env::var("RIVER_RAISES") .unwrap_or_else(|_| "3x".into());
+
     let selected_matchups: Vec<&Matchup> = match std::env::var("MATCHUPS") {
         Ok(s) => {
             let want: Vec<String> = s.split(',').map(|x| x.trim().to_uppercase()).collect();
@@ -153,6 +160,9 @@ fn main() {
     println!("Target:         {:.1}% of pot", 100.0 * target_pct);
     println!("Chance samples: {} turn × {} river per flop", turn_samples, river_samples);
     println!("Combo data:     {}", if emit_combo_data { "enabled (COMBO_DATA=1)" } else { "disabled" });
+    println!("Flop sizes:     bets={flop_bets_s}  raises={flop_raises_s}");
+    println!("Turn sizes:     bets={turn_bets_s}  raises={turn_raises_s}");
+    println!("River sizes:    bets={river_bets_s}  raises={river_raises_s}");
     println!("Output:         {}\n", out_dir.display());
 
     // Build the OOP × IP range pair per matchup (clone once, reuse per flop).
@@ -166,9 +176,12 @@ fn main() {
         (**m, oop, ip)
     }).collect();
 
-    let flop_b  = BetSizeOptions::try_from(("33%,75%", "3x")).unwrap();
-    let turn_b  = BetSizeOptions::try_from(("75%",     "3x")).unwrap();
-    let river_b = BetSizeOptions::try_from(("75%",     "3x")).unwrap();
+    let flop_b  = BetSizeOptions::try_from((flop_bets_s.as_str(),  flop_raises_s.as_str()))
+        .expect("Invalid FLOP_BETS / FLOP_RAISES");
+    let turn_b  = BetSizeOptions::try_from((turn_bets_s.as_str(),  turn_raises_s.as_str()))
+        .expect("Invalid TURN_BETS / TURN_RAISES");
+    let river_b = BetSizeOptions::try_from((river_bets_s.as_str(), river_raises_s.as_str()))
+        .expect("Invalid RIVER_BETS / RIVER_RAISES");
 
     let walk_cfg = WalkConfig {
         n_turn_samples: turn_samples,

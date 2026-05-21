@@ -11,14 +11,39 @@ export interface RangeStats {
   hist: number[];
 }
 
+/** Per-side sparse per-combo arrays (combo-v2 schema). `idx` indexes into the
+ *  spot header's `combos_oop` / `combos_ip` label list. */
+export interface SideCombo {
+  idx: number[];
+  eq: number[];
+  w: number[];
+  ev: number[];
+}
+
 export interface ComboData {
-  oop_equity: number[];
-  oop_weights: number[];
-  oop_ev: number[];
-  ip_equity: number[];
-  ip_weights: number[];
-  ip_ev: number[];
-  strategy: number[][];
+  oop: SideCombo;
+  ip: SideCombo;
+  /** Aligned with the to-act side's sparse `idx` list. Each entry is either an
+   *  integer action index (pure) or a full float distribution (mixed). */
+  strategy: Array<number | number[]>;
+}
+
+/** combo-v2 first-line header — carries the per-spot combo label lists. */
+export interface SpotHeader {
+  schema: string;
+  combos_oop: string[];
+  combos_ip: string[];
+  starting_pot: number;
+  effective_stack: number;
+}
+
+/** API payload for a single decision node's per-combo data. */
+export interface NodeCombo {
+  combos_oop: string[];
+  combos_ip: string[];
+  combo_data: ComboData;
+  actions: string[];
+  to_act: 'O' | 'I';
 }
 
 export interface NodeRecord {
