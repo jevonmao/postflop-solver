@@ -1,8 +1,8 @@
 # Postflop Viewer
 
-Next.js webviewer for previewing the solved HU 200BB postflop dataset at
-`../data/solves/`. Supports all three matchups (SRP / 3BP / 4BP); the index
-page reflects whichever matchups currently have solved spots on disk.
+Next.js webviewer for previewing the solved HU 200BB postflop dataset.
+Supports all three matchups (SRP / 3BP / 4BP); the index page reflects
+whichever matchups currently have solved spots on disk.
 
 ## Run
 
@@ -13,11 +13,29 @@ npm run dev
 # open http://localhost:3000
 ```
 
-By default it reads `../data/solves/` (relative to `viewer/`). Override with:
+## Where it reads from
+
+The viewer reads the directory that **directly contains the matchup folders**
+(`<dir>/4BP/0022_2c2dKc.jsonl`, etc.). Resolution order:
+
+1. `SOLVES_DIR` env var — explicit path, used as-is (recommended).
+2. `DATA_DIR` env var — legacy; the viewer appends `solves/`.
+3. Default — first existing of `../solves_combos`, then `../data/solves`
+   (relative to the viewer cwd).
 
 ```sh
-DATA_DIR=/path/to/repo/data npm run dev
+SOLVES_DIR=/absolute/path/to/solves_combos npm run dev
 ```
+
+Persist via `viewer/.env.local` (gitignored):
+
+```
+SOLVES_DIR=/absolute/path/to/solves_combos
+```
+
+The index page prints the resolved path under the heading so you can confirm
+which directory is in effect. If no matchup folders are found there it also
+shows an amber hint reminding you to set `SOLVES_DIR`.
 
 ## What you get
 

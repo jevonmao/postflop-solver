@@ -5,12 +5,36 @@ import type {
 } from './types';
 import { MATCHUPS } from './types';
 
-const DATA_DIR = process.env.DATA_DIR
-  ?? path.resolve(process.cwd(), '..', 'data');
-const SOLVES_DIR = path.join(DATA_DIR, 'solves');
+// Resolve the directory that directly contains the matchup folders
+// (e.g. <SOLVES_DIR>/4BP/0022_2c2dKc.jsonl).
+//
+//   1. SOLVES_DIR — explicit path to the matchup parent (preferred).
+//   2. DATA_DIR   — legacy; treated as <DATA_DIR>/solves.
+//   3. Default    — ../solves_combos relative to the viewer cwd, falling
+//                   back to ../data/solves if that doesn't exist.
+function resolveSolvesDir(): string {
+  if (process.env.SOLVES_DIR) return path.resolve(process.env.SOLVES_DIR);
+  if (process.env.DATA_DIR)   return path.join(path.resolve(process.env.DATA_DIR), 'solves');
+
+  const cwd = process.cwd();
+  const candidates = [
+    path.resolve(cwd, '..', 'solves_combos'),
+    path.resolve(cwd, '..', 'data', 'solves'),
+  ];
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fsSync = require('fs') as typeof import('fs');
+    for (const c of candidates) {
+      if (fsSync.existsSync(c)) return c;
+    }
+  } catch { /* ignore */ }
+  return candidates[0];
+}
+
+const SOLVES_DIR = resolveSolvesDir();
 
 export function dataPaths() {
-  return { DATA_DIR, SOLVES_DIR };
+  return { SOLVES_DIR };
 }
 
 async function safeReadDir(dir: string): Promise<string[]> {

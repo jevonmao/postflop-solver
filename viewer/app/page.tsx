@@ -14,12 +14,21 @@ const SUBTITLES: Record<string, string> = {
 export default async function Home() {
   const matchups = await listMatchups();
   const { SOLVES_DIR } = dataPaths();
+  // Help text for when the resolved path is empty / wrong.
+  const totalSolved = matchups.reduce((n, m) => n + m.count, 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-neutral-100">Solved spots</h1>
-        <p className="text-sm text-neutral-500 mt-1">Reading from <code className="bg-neutral-900 px-1 rounded">{SOLVES_DIR}</code></p>
+        <p className="text-sm text-neutral-500 mt-1">
+          Reading from <code className="bg-neutral-900 px-1 rounded">{SOLVES_DIR}</code>
+        </p>
+        {totalSolved === 0 && (
+          <p className="text-xs text-amber-500 mt-2">
+            No matchup folders found here. Set <code className="bg-neutral-900 px-1 rounded">SOLVES_DIR=/path/to/matchup_parent</code> and restart <code className="bg-neutral-900 px-1 rounded">npm run dev</code>.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
