@@ -1,9 +1,22 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import zlib from 'node:zlib';
+import { promisify } from 'util';
 import type {
   MatchupSummary, NodeRecord, SpotInfo, SpotMeta, Matchup,
 } from './types';
 import { MATCHUPS } from './types';
+
+// Node ≥ 22.15 exposes zstdDecompress in node:zlib. Type defs may lag.
+const zstdDecompressRaw = (zlib as unknown as {
+  zstdDecompress?: (
+    buf: Buffer,
+    cb: (err: Error | null, result: Buffer) => void,
+  ) => void;
+}).zstdDecompress;
+const zstdDecompress = zstdDecompressRaw ? promisify(zstdDecompressRaw) : null;
+
+const STEM_RE = /^(\d{4}_[A-Za-z0-9]+)\.(jsonl\.zst|jsonl|meta)$/;
 
 // Resolve the directory that directly contains the matchup folders
 // (e.g. <SOLVES_DIR>/4BP/0022_2c2dKc.jsonl).
@@ -47,11 +60,11 @@ export async function listMatchups(): Promise<MatchupSummary[]> {
     const files = await safeReadDir(dir);
     const stems = new Map<string, { jsonl: boolean; meta: boolean }>();
     for (const f of files) {
-      const m = f.match(/^(\d{4}_[A-Za-z0-9]+)\.(jsonl|meta)$/);
+      const m = f.match(STEM_RE);
       if (!m) continue;
       const cur = stems.get(m[1]) ?? { jsonl: false, meta: false };
-      if (m[2] === 'jsonl') cur.jsonl = true;
-      if (m[2] === 'meta')  cur.meta  = true;
+      if (m[2] === 'jsonl' || m[2] === 'jsonl.zst') cur.jsonl = true;
+      if (m[2] === 'meta')                          cur.meta  = true;
       stems.set(m[1], cur);
     }
     let count = 0, partial = 0;
@@ -94,11 +107,11 @@ export async function listSpots(matchup: Matchup): Promise<SpotInfo[]> {
   const files = await safeReadDir(dir);
   const stems = new Map<string, { jsonl: boolean; meta: boolean }>();
   for (const f of files) {
-    const m = f.match(/^(\d{4}_[A-Za-z0-9]+)\.(jsonl|meta)$/);
+    const m = f.match(STEM_RE);
     if (!m) continue;
     const cur = stems.get(m[1]) ?? { jsonl: false, meta: false };
-    if (m[2] === 'jsonl') cur.jsonl = true;
-    if (m[2] === 'meta')  cur.meta  = true;
+    if (m[2] === 'jsonl' || m[2] === 'jsonl.zst') cur.jsonl = true;
+    if (m[2] === 'meta')                          cur.meta  = true;
     stems.set(m[1], cur);
   }
   const infos: SpotInfo[] = [];
@@ -128,13 +141,25 @@ export async function loadSpot(matchup: Matchup, stem: string): Promise<{
   meta?: SpotMeta;
 }> {
   const dir = path.join(SOLVES_DIR, matchup);
-  const jsonlPath = path.join(dir, `${stem}.jsonl`);
+  const plainPath = path.join(dir, `${stem}.jsonl`);
+  const zstPath   = path.join(dir, `${stem}.jsonl.zst`);
   const metaPath  = path.join(dir, `${stem}.meta`);
 
-  const [content, metaTxt] = await Promise.all([
-    fs.readFile(jsonlPath, 'utf-8'),
-    fs.readFile(metaPath, 'utf-8').catch(() => null),
-  ]);
+  let content: string;
+  try {
+    content = await fs.readFile(plainPath, 'utf-8');
+  } catch {
+    const compressed = await fs.readFile(zstPath);
+    if (!zstdDecompress) {
+      throw new Error(
+        `Found ${stem}.jsonl.zst but this Node runtime has no node:zlib zstd ` +
+        `support — needs Node ≥ 22.15. Current: ${process.version}.`,
+      );
+    }
+    const decompressed = await zstdDecompress(compressed);
+    content = decompressed.toString('utf-8');
+  }
+  const metaTxt = await fs.readFile(metaPath, 'utf-8').catch(() => null);
 
   const records: NodeRecord[] = [];
   for (const line of content.split('\n')) {
