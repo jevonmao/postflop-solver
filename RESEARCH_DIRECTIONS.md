@@ -199,3 +199,104 @@ human-play datasets used by SpinGPT and similar work.
 6. **Iterative self-play loop** — play v2+SIMPO, label mistakes with solver, add to SIMPO rejected set, repeat
 
 See `TRAINING_PIPELINE.md` for full pipeline design, the mixed-strategy problem, and how CoT traces integrate.
+
+---
+
+## 8. Solver Acceleration: Neural-Augmented Depth-Limited Solving
+
+A separate research thread from the LLM work: speeding up dataset *generation*
+itself. The current solver is memory-bandwidth bound — SRP spots cost ~140s /
+8–17 GB each, dominated by turn/river chance branching. The full HU 200BB
+dataset is ~3 days continuous on one machine.
+
+### 8.1 Core idea — depth-limited solving with neural leaf values
+
+CFR run on a *truncated* tree with correct leaf values converges to the exact
+equilibrium of the full game. So: run real Discounted CFR on the shallow part
+(flop + turn decision nodes), and at a depth limit query a neural
+**counterfactual-value (CFV) network** instead of recursing into the deep
+subtree. Accuracy is preserved up to NN leaf error — measurable by re-solving a
+sample at full depth.
+
+This is **not novel** — it is the DeepStack (2017) / ReBeL (2020) design, and is
+already productized by GTO Wizard AI ("solve one street at a time") and
+Deepsolver. Our differentiator is *use*: exposing per-combo CFV/EV/range
+internals as grounded LLM supervision (Sections 4, 6), which no play-oriented
+tool emits.
+
+### 8.2 Phased plan (blueprint-only ≈ 3 months, 1 engineer)
+
+| Phase | Work | Risk | Payoff |
+|---|---|---|---|
+| 1 | Warm-start CFR — NN predicts initial regrets/strategy, DCFR refines | Low (accuracy-neutral; just init) | ~2–4× fewer iterations |
+| 2 | CFV net — range-conditioned, predicts per-hand CFVs for both players | Med | enables Phase 3 |
+| 3 | Solver integration — `depth_limit` in `TreeConfig`, neural-leaf node type, ONNX inference in-process via `ort` crate, batched per-iteration leaf queries | Med-High | est. 5–20× on SRP, big RAM cut |
+| 4 | Validation harness — continuous full-depth re-solve sample, bounds NN exploitability | Low | makes the accuracy claim honest |
+
+Target SRP only (deepest trees, real cost). 3BP/4BP already cheap (~12s/~1.5s).
+
+### 8.3 Cost reality — data generation dominates, not GPU training
+
+- **Phase 1 net**: free data (every full solve yields `(node → strategy)` records); GPU training trivial.
+- **CFV nets**: data is NOT free. Ranges reaching nodes in equilibrium solves are
+  a narrow distribution; CFR queries the net with wildly off-equilibrium ranges
+  mid-solve. DeepStack trained on **randomly generated ranges** for this reason
+  (~10M river, ~1M turn situations) — dedicated data-generation solves.
+- River-net data (~2M river solves @ ~0.2s): ~12–24h on svl8 + cloud burst.
+- Turn-net data (~1M turn solves @ ~10s): ~115 days naively — **infeasible**.
+- **Bootstrap trick**: once the river net works, generate turn-net data with
+  river-net-truncated solves (<1s each) → collapses to a few days. Strict
+  dependency order: river net → integrate → turn net.
+
+### 8.4 Recent CFR research worth pulling in (2024–2026)
+
+| Work | Year | Relevance |
+|---|---|---|
+| **PCFR+ / PDCFR+** | IJCAI 2024 | Predictive/optimistic regret matching via optimistic OMD; orders-of-magnitude faster Nash-gap on zero-sum benchmarks. [arXiv:2404.13891](https://arxiv.org/abs/2404.13891) |
+| **IREG-PRM+** | Oct 2025 | Scale-invariant predictive RM+, drop-in, no new hyperparameters. [arXiv:2510.04407](https://arxiv.org/abs/2510.04407) |
+| **Deep (Predictive) Discounted CFR** | Nov 2025 | VR-DeepPDCFR+: learn cumulative *advantages* not counterfactual regrets (eliminates opponent-reach variance); bootstrapped targets; variance-reduction baseline. [arXiv:2511.08174](https://arxiv.org/abs/2511.08174) |
+
+### 8.5 Unexplored combinations (candidate novelty)
+
+Genuine gaps — no published work found combining these:
+
+1. **PDCFR+ as the inner engine of depth-limited resolving.** DeepStack/ReBeL use
+   vanilla CFR/CFR+. This solver already runs DCFR — upgrading to *Predictive*
+   DCFR+ is a small, well-scoped change; pairing it with neural leaves is
+   uncombined. **Lowest-risk, highest-leverage.**
+2. **Advantage-style targets for the CFV *leaf* net.** The Nov 2025 "learn
+   advantages not counterfactual regrets" insight is applied only to the regret
+   net; the CFV leaf net has the identical opponent-reach variance problem.
+3. **NN as the *prediction term* inside optimistic CFR** — not NN-as-evaluator,
+   not NN-as-regret-approximator; a third role.
+4. **Permutation-invariant (set-transformer) range encoding for CFV nets** — see 8.6.
+
+### 8.6 Transformer architecture — the low-risk / high-value pick
+
+**Recommendation: one transformer, in the CFV net's range/card encoder only.**
+
+- Tokens: board cards with learned rank+suit embeddings; each player's range as a
+  *set* of weighted hand tokens. Cross-attention; per-hand CFV via a per-hand
+  query. Use **ISAB** (Induced Set Attention, [arXiv:1810.00825](https://arxiv.org/abs/1810.00825))
+  to avoid full 1326² attention.
+- **Low risk**: the net is being built anyway, MLP is the fallback; the
+  transformer touches encoding, not the hard part (CFV accuracy); card-embedding
+  + attention is already proven in poker ML.
+- **High value**: permutation invariance is free; suit isomorphism and blocker
+  structure become inductive bias → better cross-board generalization → **fewer
+  solved training situations needed** → directly cuts the dominant cost (8.3).
+- **Freebie**: swap the LSTM action-history encoder for a small transformer —
+  near-zero risk, modest value (history is short).
+- **Do NOT** put a transformer inside the CFR regret-update loop — high risk,
+  unclear value. Keep transformers in encoders/value nets only.
+- **Discipline that keeps it low-risk**: build the MLP CFV net first as baseline
+  + fallback, then the transformer variant, then A/B on a fixed validation set
+  measuring accuracy *and* data efficiency (100k/300k/1M training-curve sweep).
+
+### 8.7 Honest caveats
+
+- The method is not novel (DeepStack/GTO Wizard); the *data product* is.
+- "Keeps CFR accuracy" is true only up to NN leaf error — Phase 4 is mandatory.
+- Predictive CFR's speedup is largest on non-poker benchmarks; poker chance
+  branching may dilute it — validate on one SRP spot before committing.
+- Commercial labs may have done 8.5 #1/#4 privately; "no paper" ≠ "no one did it".
